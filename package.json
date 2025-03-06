@@ -1,0 +1,55 @@
+{
+  "name": "volkore",
+  "version": "2.1.0",
+  "description": "Simple object based hook and state manager for React.",
+  "main": "lib/main.js",
+  "module": "lib/main.esm.js",
+  "author": "Felipe Rodriguez Herrera",
+  "license": "MIT",
+  "types": "lib/main.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "deploy": "npm version minor --force -m",
+    "parche": "npm version patch --force -m",
+    "version": "git add -A ",
+    "postversion": "git push origin && git push origin --tags && yarn config set version-git-message 'v%s' "
+  },
+  "files": [
+    "lib",
+    "package.json"
+  ],
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {
+    "@types/node": "^15.3.0",
+    "@types/react": "^17.0.20",
+    "rollup": "^2.79.2",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "typescript": "^4.9.5"
+  },
+  "peerDependencies": {
+    "react": ">= 16.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ksoze84/volkore.git"
+  },
+  "keywords": [
+    "object",
+    "class",
+    "state",
+    "manager",
+    "hook",
+    "react",
+    "shared",
+    "share",
+    "instance",
+    "Selector",
+    "derived"
+  ],
+  "bugs": {
+    "url": "https://github.com/ksoze84/volkore/issues"
+  },
+  "homepage": "https://github.com/ksoze84/volkore#readme"
+}
