@@ -12,7 +12,7 @@ KeyPoints:
 * Or use the hooks to store and share the state & kore instance: useVolKore( Kore Class ). 
   * Maintain a unique instance of the kore class on memory across your application. 
   * Share the state and actions to update it between components.
-  * Two ways to avoid unnecessary re-renders on related components: getVolKore() or useVolkore( KoreDef : array ) hook.
+  * Two ways to avoid unnecessary re-renders on related components: getVolKore( Kore Class ) or useVolkore( Kore&Partial ) hook.
 * Minimal and simple code. Small footprint and low impact in React's cycles. ( < 5kB minified ).
 
 This readme [looks better in gitHub](https://github.com/ksoze84/volkore?tab=readme-ov-file#volkore)
@@ -74,7 +74,7 @@ npm install volkore --save
 
 ## How to use
 
-1. Create a kore class C_Handler that extends Kore < StateType >. Add all state update methods you want to this class.
+1. Create a kore Class C_Handler that extends Kore< StateType >. Add all state update methods you want to this class.
 2. Use one of the hooks like useKore( C_Handler, initial_value ). This hook returns [ state, C_Handler ]
 3. enjoy!
 
