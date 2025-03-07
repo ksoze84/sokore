@@ -36,14 +36,14 @@ function mountLogicAssign<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatc
     return partialMountLogic( dispatcher, koreDefinition[0], koreDefinition[1] );
 }
 
-function useVolKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, initial_value : J | (() => J)) : Readonly<[T, H]>
-function useVolKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
+function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, initial_value : J | (() => J)) : Readonly<[T, H]>
+function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
 
-function useVolKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, Array<keyof T> | CompareFunction<T>], initial_value : J | (() => J)) : Readonly<[T, H]>
-function useVolKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, Array<keyof T> | CompareFunction<T>], initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
+function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, Array<keyof T> | CompareFunction<T>], initial_value : J | (() => J)) : Readonly<[T, H]>
+function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, Array<keyof T> | CompareFunction<T>], initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
 
-function useVolKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, SelectorFunction<T, F>], initial_value : J | (() => J)) : Readonly<[F , H]>
-function useVolKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, SelectorFunction<T, F>], initial_value? : J | (() => J)) : Readonly<[H extends Koreko<T, S> ? F : undefined, H]>
+function useSoKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, SelectorFunction<T, F>], initial_value : J | (() => J)) : Readonly<[F , H]>
+function useSoKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, SelectorFunction<T, F>], initial_value? : J | (() => J)) : Readonly<[H extends Koreko<T, S> ? F : undefined, H]>
 
 /**
  * 
@@ -61,7 +61,7 @@ function useVolKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( 
  * 
  * @returns A readonly tuple containing the current state and the handler instance.
  */
-function useVolKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : ( new ( s?:T ) => H ) | [new ( s?:T ) => H, DepsOrComp<T, F>], initial_value: J | (() => J)  )  : Readonly<[T | F | undefined, H]>  {
+function useSoKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : ( new ( s?:T ) => H ) | [new ( s?:T ) => H, DepsOrComp<T, F>], initial_value: J | (() => J)  )  : Readonly<[T | F | undefined, H]>  {
   const kore                        = initKore<T, S, H>( koreDefinition, initial_value );
   const [, setState]                = React.useState<T>( kore.state as T );    
   
@@ -70,4 +70,4 @@ function useVolKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( 
   return [ (kore as any)["__korekoStateDeriver_"](), kore ];
 }
 
-export { useVolKore };
+export { useSoKore };

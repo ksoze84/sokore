@@ -1,4 +1,4 @@
-# Volkore
+# SoKore
 
 Simple class based hook and state manager for React.
 
@@ -8,25 +8,25 @@ KeyPoints:
 * You write the class actions, the hook manages the rest.
 * Heavy functions are not instantiated in every render. Minimize overhead by avoiding useCallback, useReducer, useMemo, and dependency arrays.
 * Helps to separate logic from render.
-* A basic standalone hook that doesn't store nor share the instance nor its state: useKore.
-* And a hook to store and share the instance and its state: useVolKore. 
+* A basic standalone hook that doesn't store nor share the instance: useKore.
+* And a hook to store and share the instance and its state: useSoKore. 
   * The hook maintains a unique instance and its state across your application. 
   * Share the state and actions to update it between components.
   * Two ways to avoid unnecessary re-renders on related components.
 * Minimal and simple code. Small footprint and low impact in React's cycles. ( < 5kB minified ).
 
-This readme [looks better in gitHub](https://github.com/ksoze84/volkore?tab=readme-ov-file#volkore)
+This readme [looks better in gitHub](https://github.com/ksoze84/sokore?tab=readme-ov-file#sokore)
 
 ## Example
 
 ```tsx
-class CountHandler extends Kore {
+class Counter extends Kore {
   add      = () => this.setState( s => s + 1 );
   subtract = () => this.setState( s => s - 1 );
 }
 
 function Counter() {
-  const [count, {add, subtract}] = useKore(CountHandler, 0);
+  const [count, {add, subtract}] = useKore(Counter, 0);
 
   return (
     <div>
@@ -49,10 +49,10 @@ function Counter() {
   - [Rules](#rules)
 - [The no-store hook: useKore](#the-no-store-hook-usekore)
   - [Example](#example-1)
-- [Storing and sharing : useVolKore and getVolKore](#storing-and-sharing--usevolkore-and-getvolkore)
-  - [useVolKore](#usevolkore)
-  - [Get the instance with getVolKore](#get-the-instance-with-getvolkore)
-  - [useVolKore to update only when a determined subset of state properties changes](#usevolkore-to-update-only-when-a-determined-subset-of-state-properties-changes)
+- [Storing and sharing : useSoKore and getSoKore](#storing-and-sharing--usesokore-and-getsokore)
+  - [useSoKore](#usesokore)
+  - [Get the instance with getSoKore](#get-the-instance-with-getsokore)
+  - [useSoKore to update only when a determined subset of state properties changes](#usesokore-to-update-only-when-a-determined-subset-of-state-properties-changes)
 - [The kore object](#the-kore-object)
   - [State initialization](#state-initialization)
   - [instanceCreated() function](#instancecreated-function)
@@ -72,14 +72,14 @@ function Counter() {
 ### Installation
 
 ```
-npm install volkore --save
+npm install SoKore --save
 ```
 
 ### How to use
 
 1. Create a class that extends the Kore< StateType > class. Extending this class gives a state and a setState to the child class "kore class". 
 1. Add all the state update methods ( actions ) you want to this kore class.
-1. Use the no-store useKore( Kore Class, initial_value ) hook or the store-based useVolKore( Kore Class, initial_value ) hook in your components. These hooks return [ state, kore ].
+1. Use the no-store useKore( Kore Class, initial_value ) hook or the store-based useSoKore( Kore Class, initial_value ) hook in your components. These hooks return [ state, kore ].
 1. kore is the object instance with all the actions you wrote to be used in your component.
 
 ### Rules
@@ -97,7 +97,7 @@ function useKore( kore_class, initialValue? )
 
 This is a simple, classic-behavior custom hook that:
 * Creates an instance using the class; instance and state is not stored/shared.
-* **This hook does not work alongside useVolKore nor getVolKore, because these store the instance.**
+* **This hook does not work alongside useSoKore nor getSoKore, because these store the instance.**
 * More performant than these other hooks.
 * But have the same advantages:
   * Work with classes.
@@ -107,9 +107,9 @@ This is a simple, classic-behavior custom hook that:
 
 ### Example
 ```tsx
-import { Kore, useKore } from "volkore";
+import { Kore, useKore } from "SoKore";
 
-class CountHandler extends Kore<number> {
+class Counter extends Kore<number> {
   state = 0;
   public add      = () => this.setState( s => s + 1 );
   public subtract = () => this.setState( s => s - 1 );
@@ -117,7 +117,7 @@ class CountHandler extends Kore<number> {
 }
 
 function Counter() {
-  const [count, {add, subtract}] = useKore(CountHandler);
+  const [count, {add, subtract}] = useKore(Counter);
 
   return (
     <div>
@@ -129,29 +129,29 @@ function Counter() {
 }
 ```
 
-## Storing and sharing : useVolKore and getVolKore
+## Storing and sharing : useSoKore and getSoKore
 
-The useVolKore hook and the getVolKore utility method, create, use, store, and share a unique instance of the kore class across your application, at global scope. 
-These can update the state between components; getVolKore is not a hook, so never trigger a re-render when is used in a component, but can be used to update the state.
+The useSoKore hook and the getSoKore utility method, create, use, store, and share a unique instance of the kore class across your application, at global scope. 
+These can update the state between components; getSoKore is not a hook, so never trigger a re-render when is used in a component, but can be used to update the state.
 
-With the useVolKore hook, if you pass a determined subset of the State, a.k.a. a partial definition, alongside the kore class as first argument, you may control when the component using it re-renders.  
+With the useSoKore hook, if you pass a determined subset of the State, a.k.a. a partial definition, alongside the kore class as first argument, you may control when the component using it re-renders.  
 
-To bind the components using the useVolKore hook and the getVolKore method toghether, just use the same kore class.
+To bind the components using the useSoKore hook and the getSoKore method toghether, just use the same kore class.
 
 
-### useVolKore
+### useSoKore
 
 ```js
-function useVolKore( kore_class, initialValue? )
+function useSoKore( kore_class, initialValue? )
 ```
 
 
 This hook is equal to useKore, but store, or use an already stored, instance of the kore and its state.
 
 ```tsx
-import { Kore, useVolKore } from "volkore";
+import { Kore, useSoKore } from "SoKore";
 
-class CountHandler extends Kore<number> {
+class Counter extends Kore<number> {
   state = 0;
   public add      = () => this.setState( s => s + 1 );
   public subtract = () => this.setState( s => s - 1 );
@@ -159,7 +159,7 @@ class CountHandler extends Kore<number> {
 }
 
 function Counter() {
-  const [count, {add, subtract}] = useVolKore(CountHandler);
+  const [count, {add, subtract}] = useSoKore(Counter);
 
   return (
     <div>
@@ -171,20 +171,20 @@ function Counter() {
 }
 ```
 
-### Get the instance with getVolKore
+### Get the instance with getSoKore
 
 ```js
-function getVolKore( kore_class )
+function getSoKore( kore_class )
 ```
 
-Get the instance of your kore using the getVolKore utility method. This method is not a hook, so it never triggers a new render. 
+Get the instance of your kore using the getSoKore utility method. This method is not a hook, so it never triggers a new render. 
 
 Yuo can use this method mainly for two things:
 * To use kore object actions without triggering re-renders in "control-only" components
 * To use the kore object outside react
 
 ```tsx
-class CountHandler extends Kore<number> {
+class Counter extends Kore<number> {
   state = 0;
 
   public add      = () => this.setState( s => s + 1 );
@@ -193,7 +193,7 @@ class CountHandler extends Kore<number> {
 }
 
 function Controls() {
-  const {add, subtract} = getVolKore(CountHandler);
+  const {add, subtract} = getSoKore(Counter);
 
   return (
     <div className="buttons">
@@ -204,7 +204,7 @@ function Controls() {
 }
 
 function Counter() {
-  const [count] = useVolKore(CountHandler);
+  const [count] = useSoKore(Counter);
 
   return (
     <div>
@@ -223,12 +223,12 @@ export function App() {
 }
 ```
 
-### useVolKore to update only when a determined subset of state properties changes
+### useSoKore to update only when a determined subset of state properties changes
 ```js
-function useVolKore( [kore_class, partialDefinition], initialValue? )
+function useSoKore( [kore_class, partialDefinition], initialValue? )
 ```
 
-When a non-undefined object with many properties is used as state, the useVolKore hook will trigger re-render for any part of the state changed, even if the component is using only one of the properties. This can be optimized adding a partial definition to the first argument of the useVolKore hook, which performs a shallow comparison for the subset of the state determined by the partial definition. 
+When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render for any part of the state changed, even if the component is using only one of the properties. This can be optimized adding a partial definition to the first argument of the useSoKore hook, which performs a shallow comparison for the subset of the state determined by the partial definition. 
 
 This partial definition can be one of: 
 
@@ -236,12 +236,12 @@ This partial definition can be one of:
 * A selector function that tooks a state variable and result in an array, an object or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
 * A comparator function that tooks a prevState and a nextState variables as arguments, and must return a boolean value.
 
-**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useVolKore( kore_class ) and getVolKore first.**
+**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( kore_class ) and getSoKore first.**
 
 Updating the previous example:
 
 ```tsx
-class CountHandler extends Kore<{chairs:number, tables:number, rooms:number}> {
+class Counter extends Kore<{chairs:number, tables:number, rooms:number}> {
   state = {
     chairs: 0,
     tables : 0,
@@ -261,7 +261,7 @@ class CountHandler extends Kore<{chairs:number, tables:number, rooms:number}> {
 
 function Rooms() {
   // This component re-renders only if rooms property changes
-  const [{rooms}, {setRooms}] = useVolKore([CountHandler, ["rooms"]]);
+  const [{rooms}, {setRooms}] = useSoKore([Counter, ["rooms"]]);
 
   return <>
     <span>Chairs: </span>
@@ -271,7 +271,7 @@ function Rooms() {
 
 function Chairs() {
   // This component re-renders only if the compare function(prevState, nextState) returns true
-  const [{chairs},{addChairs,subtractChairs}] = useVolKore( [CountHandler, (p, n) => p.chairs !== n.chairs] ); 
+  const [{chairs},{addChairs,subtractChairs}] = useSoKore( [Counter, (p, n) => p.chairs !== n.chairs] ); 
 
   return <>
     <span>Chairs: {chairs}</span>
@@ -283,7 +283,7 @@ function Chairs() {
 function Tables() {
   // This component re-renders only if tables.toString() changes
   // Here tables is a string
-  const [tables, {addTables, subtractTables}] = useVolKore( [CountHandler, ( s ) => s.tables.toString()] ); 
+  const [tables, {addTables, subtractTables}] = useSoKore( [Counter, ( s ) => s.tables.toString()] ); 
 
   return <>
     <span>Tables: {tables}</span>
@@ -305,7 +305,7 @@ You can set an initial state in the class definition or pass an initial value on
 Prefer setting the state in the class definition for easier readability.
 
 ```tsx
-class CountHandler extends Kore<{chairs:number, tables:number, rooms:number}> {
+class Counter extends Kore<{chairs:number, tables:number, rooms:number}> {
   state = {
     chairs: 0,
     tables : 0,
@@ -318,7 +318,7 @@ class CountHandler extends Kore<{chairs:number, tables:number, rooms:number}> {
 // OR 
 
 function Counter() {
-  const [counters] = useVolKore(CountHandler, { chairs: 0, tables : 0, rooms : 10 });
+  const [counters] = useSoKore(Counter, { chairs: 0, tables : 0, rooms : 10 });
 
  ...
 }
@@ -330,12 +330,12 @@ function Counter() {
 
 ### instanceCreated() function
 
-Optional method that is called only once when an instance is created. If exists in the instance, this method is called by the useVolKore or useKore hook the first time a component in the application using the hook is effectively mounted and when the instance is "newly created".  
+Optional method that is called only once when an instance is created. If exists in the instance, this method is called by the useSoKore or useKore hook the first time a component in the application using the hook is effectively mounted and when the instance is "newly created".  
 
-This method has NOT the same behavior as mount callback of a component in React when using useVolKore. The only way this method is called again by the hook is by destroying the instance first with destroyInstance().
+This method has NOT the same behavior as mount callback of a component in React when using useSoKore. The only way this method is called again by the hook is by destroying the instance first with destroyInstance().
 
 ```tsx
-class CountHandler extends Kore<{chairs:number, tables:number, rooms:number}> {
+class Counter extends Kore<{chairs:number, tables:number, rooms:number}> {
   state = {
     chairs: 0,
     tables : 0,
@@ -366,7 +366,7 @@ You may configure the kore object by setting the optional property _koreConfig i
 Overwrite the state is the default mode for the kore object setState, but you can configure the kore to merge. This can be usefull for refactor old class components.
 
 ```tsx
-class CountHandler extends Kore<{chairs:number, tables:number, rooms:number}> {
+class Counter extends Kore<{chairs:number, tables:number, rooms:number}> {
   state = {
     chairs: 0,
     tables : 0,
@@ -385,7 +385,7 @@ class CountHandler extends Kore<{chairs:number, tables:number, rooms:number}> {
 }
 
 function Chairs() {
-  const [{chairs},{addChairs, subtractChairs}] = useVolKore(CountHandler);
+  const [{chairs},{addChairs, subtractChairs}] = useSoKore(Counter);
 
   return <>
     <span>Chairs: {chairs}</span>
@@ -395,7 +395,7 @@ function Chairs() {
 }
 
 function Tables() {
-  const [{tables},{addTables, subtractTables}] = useVolKore(CountHandler);
+  const [{tables},{addTables, subtractTables}] = useSoKore(Counter);
 
   return <>
     <span>Tables: {tables}</span>
@@ -404,7 +404,7 @@ function Tables() {
   </>
 }
 ```
-**Note that the useVolKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized adding a partial definition to useVolKore first argument.**  
+**Note that the useSoKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized adding a partial definition to useSoKore first argument.**  
 **Merging mode is only for non-undefined objects, and there is no check of any kind for this before doing it, so its on you to guarantee an initial and always state object.**
 
 
@@ -414,7 +414,7 @@ Classes are made for reutilization, making new object instances from these. But 
 One way to use your class again with this hook without duplicating code is to extend it:
 
 ```ts
-class CountHandlerTwo extends CountHandler {};
+class CounterTwo extends Counter {};
 ```
 
 ### Extendibility and Inheritance
@@ -476,7 +476,7 @@ class SpecificApiHandler extends MyGenericApiHandler { loadUri = 'https://myapi/
 
 export function MyComponent() {
 
-  const [{data, isLoading}, {load, formModify, save} ] = useVolKore( SpecificApiHandler );
+  const [{data, isLoading}, {load, formModify, save} ] = useSoKore( SpecificApiHandler );
 
   useEffect( () => { load() }, [] );
 
@@ -496,7 +496,7 @@ import { produce, WritableDraft } from "immer";
 type CountState = {chairs:number, tables:number, rooms:number};
 type MySetStateType = ( recipe : (draft: WritableDraft<CountState>) => void ) => void;
 
-export class CountHandler extends Kore<CountState, MySetStateType> {
+export class Counter extends Kore<CountState, MySetStateType> {
   state = {
     chairs: 0,
     tables : 0,
@@ -508,7 +508,7 @@ export class CountHandler extends Kore<CountState, MySetStateType> {
 }
 
 function Chairs() {
-  const [{chairs}, {setState}] = useVolKore(CountHandler);
+  const [{chairs}, {setState}] = useSoKore(Counter);
   return <>
     <span>Chairs: {chairs}</span>
     <button onClick={() => setState( s => { s.chairs++ } )}>+</button>
@@ -517,7 +517,7 @@ function Chairs() {
 }
 
 function Tables() {
-  const [{tables}, {setState}] = useVolKore(CountHandler);
+  const [{tables}, {setState}] = useSoKore(Counter);
   return <>
     <span>Tables: {tables}</span>
     <button onClick={() => setState( s => { s.tables++ } )}>+</button>
@@ -544,7 +544,7 @@ This is not neccesary if the kore option destroyOnUnmount is true, nor with the 
 ```tsx
 export function App() {
 
-  const [ {data}, {load, destroyInstance} ] = useVolKore( CountHandler );
+  const [ {data}, {load, destroyInstance} ] = useSoKore( Counter );
 
   useEffect( () => {
     load();

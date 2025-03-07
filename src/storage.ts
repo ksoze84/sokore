@@ -91,7 +91,7 @@ export function unmountLogic<T, S>( dispatcher: React.Dispatch<React.SetStateAct
  * @param koreClass - The constructor of the Kore class.
  * @returns The instance of the Kore class.
  */
-export function getKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H ) : H {
+export function getSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H ) : H {
   if ( storage.has( koreClass.name ) )
     return storage.get( koreClass.name )!.kore as H;
   else{

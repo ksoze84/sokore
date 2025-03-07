@@ -28,20 +28,19 @@ export type SetStateType<T> = (value: T | Partial<T> | ((prevState: T) => T | Pa
 
 
 /**
- * Abstract class representing a state handler. This class should be extended to create a state handler.  
- * The extended Class must be passed to the useStateHandler hook to work with React.  
- * The hook useStateHandler will maintain only one instance of the class per application at a time.  
- * The instance of this Class will be only one in the application, and will be shared between all components that use the [useStateHandler Hook, Class] pair saving its state.  
- * Mounting and unmounting components will not necesarily affect the instance nor its state.  
- * When is created a new instance of the class, the instanceCreated() method is called.
- * 
+ * Abstract class representing a "Kore" that have a state and a setState method.  
+ * This class should be extended to create a custom "kore" with actions.  
+ * The extended class must be passed to the useSoKore or useKore hook to work with React.  
+ * When a new instance of the class is created, the instanceCreated() method is called.
+ *
  * @template T - The type of the state.
+ * @template S - The type of the setState method. Defaults to SetStateType<T>.
  */
 export abstract class Kore<T, S = SetStateType<T>> {
 
 
   /**
-   * Configuration object for the state handler.
+   * Configuration object for the Kore.
    * 
    * @property {boolean} merge - Indicates whether to merge the state.
    * @property {boolean} destroyOnUnmount - Indicates whether to destroy the state on unmount.
@@ -56,8 +55,8 @@ export abstract class Kore<T, S = SetStateType<T>> {
   public state?: T;
 
   /**
-   * Optional Callback function that is called only once when an instance is created.  
-   * This Method is Called by the useStateHandler hook the first time a component in the application using the hook is effectively mounted and when the instance is "newly created".  
+   * Optional callback function that is called only once when an instance is created.  
+   * This Method is called by the useSoKore or useKore hook the first time a component in the application using the hook is effectively mounted and when the instance is "newly created".  
    * Prefer this mehtod over the constructor to execute initial code.  
    * This method has NOT the same behavior as mount callback a component in React.  
    * The only way this method is called again by the hook is destroying the instance first with destroyInstance().
@@ -88,7 +87,7 @@ export abstract class Kore<T, S = SetStateType<T>> {
 
 
   /**
-   * Sets the state and notifies all listeners. (wrapper for _setState)
+   * Sets the state and notifies all listeners. (wrapper for the actual _setState)
    * 
    */
   protected setState : S = this._setState as S
@@ -102,7 +101,7 @@ export abstract class Kore<T, S = SetStateType<T>> {
   public destroyInstance = () => {};
 
   /**
-   * Constructs a new instance of the StateHandler class.  
+   * Constructs a new instance of the Kore class.  
    * Prefer use the method instanceCreated() instead of the constructor.  
    * Constructor code of the class and its inherited instances constructors are not part of the mounting/unmounting logic of react. Listeners may or may not be ready.  
    * 

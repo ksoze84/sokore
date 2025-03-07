@@ -1,5 +1,5 @@
 import { Kore } from "./Kore";
-import { getKore } from "./storage";
-import { useVolKore } from "./useVolKore";
+import { getSoKore } from "./storage";
+import { useSoKore } from "./useSoKore";
 import { useKore } from "./useKore";
-export { Kore, useVolKore, getKore, useKore };
+export { Kore, useSoKore, getSoKore, useKore };
