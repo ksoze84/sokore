@@ -53,6 +53,7 @@ function useSoKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( k
  * Unmounting components will not necessarily affect the instance nor its state.
  *
  * @template T - The type of the state.
+ * @template F - The return type of the selector.
  * @template S - The type of the setState.
  * @template H - The type of the handler class, which extends `StateHandler<T>`
  * 
