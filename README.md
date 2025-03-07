@@ -236,7 +236,7 @@ This partial definition can be one of:
 * A selector function that tooks a state variable and result in an array, an object or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
 * A comparator function that tooks a prevState and a nextState variables as arguments, and must return a boolean value.
 
-**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useVolKore( Kore Class ) and getVolKore first.**
+**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useVolKore( kore_class ) and getVolKore first.**
 
 Updating the previous example:
 
