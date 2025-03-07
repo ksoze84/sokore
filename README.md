@@ -134,9 +134,9 @@ function Counter() {
 The useVolKore hook and the getVolKore utility method, create, use, store, and share a unique instance of the kore class across your application, at global scope. 
 These can update the state between components; getVolKore is not a hook, so never trigger a re-render when is used in a component, but can be used to update the state.
 
-With the useVolKore hook, if you pass a partial definition a.k.a. a determined subset of the State, alongside the kore class as first argument, you may control when and how the component using it re-renders.  
+With the useVolKore hook, if you pass a determined subset of the State, a.k.a. a partial definition, alongside the kore class as first argument, you may control when the component using it re-renders.  
 
-To bind the components using the useVolKore hook and the getVolKore method, toghether, just use the same kore class.
+To bind the components using the useVolKore hook and the getVolKore method toghether, just use the same kore class.
 
 
 ### useVolKore
