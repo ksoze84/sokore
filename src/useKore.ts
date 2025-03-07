@@ -60,7 +60,7 @@ function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreCl
   useEffect(() => {
     kore["instanceCreated"]?.();
     return () => kore.destroyInstance()
-  })
+  }, [])
 
   return [ kore.state, kore as H ];
 }

@@ -228,7 +228,9 @@ export function App() {
 function useSoKore( [kore_class, partialDefinition], initialValue? )
 ```
 
-When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render on the component for any part of the state changed, even if the component is using only one of the properties. This can be optimized adding a partial definition of the state to the first argument of the useSoKore hook, which performs a shallow comparison for the subset of the state determined by the partial definition. 
+When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render on the component for any part of the state changed, even if the component is using only one of the properties. 
+
+This can be optimized adding a partial definition of the state to the first argument of the useSoKore hook in an array. This will performs a shallow comparison for the subset of the state determined by the partial definition. 
 
 This partial definition can be one of: 
 * An array of strings with some of the state property names.
