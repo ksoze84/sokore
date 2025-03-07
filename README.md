@@ -271,7 +271,7 @@ function Chairs() {
 function Tables() {
   // This component re-renders only if tables.toString() changes
   // Here tables is a string
-  const [tables, {addTables, subtractTables}] = useSoKore( [CounterKore, ( s ) => s.tables.toString()] ); 
+  const [tables, {addTables, subtractTables}] = useSoKore( [CounterKore, s => s.tables.toString()] ); 
 
   return <>
     <span>Tables: {tables}</span>
