@@ -29,18 +29,11 @@ import { mountLogic } from "./storage";
 
 export type SelectorFunction <T, F> = ( s : T ) => F;
 export type CompareFunction <T> = ( prevSTate : T, nextState : T ) => boolean;
-export type DepsOrComp<T, F> = Array<keyof T> | SelectorFunction<T, F> | CompareFunction<T>;
+export type DepsOrComp<T, F> = SelectorFunction<T, F> | CompareFunction<T>;
 
 export function checkDepsSetter<T, F>( dispatcher: React.Dispatch<React.SetStateAction<T>>, deps: DepsOrComp<T, F> ) {
   return ( newState : T ) => {
-    if( Array.isArray( deps ) )
-      return dispatcher( s => {
-        for( const dep of deps )
-          if( s[dep] !== newState[dep] )
-            return newState;
-        return s;
-      })
-    else if ( deps instanceof Function && deps.length === 1 ){
+    if ( deps.length === 1 ){
       return dispatcher( s => {
         const oldSelector = (deps as SelectorFunction<T, F>)( s );  
         const newSelector = (deps as SelectorFunction<T, F>)( newState );
@@ -56,7 +49,7 @@ export function checkDepsSetter<T, F>( dispatcher: React.Dispatch<React.SetState
         return s;
       });
     }
-    else if ( deps instanceof Function && deps.length === 2 ){
+    else{
       return dispatcher( s => {
         if( (deps as CompareFunction<T>)( s, newState ) )
           return newState;

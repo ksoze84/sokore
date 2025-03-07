@@ -1,6 +1,6 @@
 {
   "name": "sokore",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "Simple object based hook and state manager for React.",
   "main": "lib/main.js",
   "module": "lib/main.esm.js",

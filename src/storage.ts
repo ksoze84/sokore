@@ -36,8 +36,6 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreDefinit
 
     (kore as any).__korekoDispatcher_ = (s : T) => storage.get( koreClass.name )?.listeners?.forEach( l => l( s ) );
     (kore as any).destroyInstance = () => destroyInstance( kore );
-
-    (kore as any).__korekoStateDeriver_ = () =>  (koreDefinition as any)[1] instanceof Function && (koreDefinition as any)[1]?.length === 1 ? (koreDefinition as any)[1]( kore.state ) : kore.state;
     
     return kore;
   }

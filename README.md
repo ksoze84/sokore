@@ -80,8 +80,8 @@ npm install sokore --save
 
 1. Create a class that extends the Kore< StateType > class. Extending this class gives a state and a setState to the child class "kore class". 
 1. Add all the state update methods ( actions ) you want to this kore class.
-1. Use the no-store useKore( Kore Class, initial_value ) hook or the store-based useSoKore( Kore Class, initial_value ) hook in your components. These hooks return [ state, kore ].
-2. This "kore" object is the instance of the class you wrote with the actions you need to use in your component.
+1. Use the no-store useKore( Kore Class, initial_value ) hook or the store-based useSoKore( Kore Class, initial_value ) hook in your components. These hooks return [ state, kore ]. 
+2. This "kore" object is the instance of the class you wrote with the actions you need to use in your component. This kore object is stable, so it's safe to exclude from React's dependency arrays.
 
 ### Rules
 
@@ -135,7 +135,7 @@ function Counter() {
 The useSoKore hook and the getSoKore utility method, create, use, store, and share a unique instance of your kore class across the application, at global scope. 
 Either can update the state between components; but getSoKore is not a hook, so never trigger a re-render in the component.
 
-With the useSoKore hook, if you pass a partial definition of the state alongside the kore class as first argument, you may control when the component re-renders.  
+With the useSoKore hook, if you pass a partial definer of the state alongside the kore class as first argument, you may control when the component re-renders.  
 
 To bind the components using the useSoKore hook and/or the getSoKore method toghether, just use the same kore class.
 
@@ -225,19 +225,18 @@ export function App() {
 
 ### useSoKore to update only when a determined subset of state properties changes
 ```js
-function useSoKore( [kore_class, partialDefinition], initialValue? )
+function useSoKore( [kore_class, partialDefiner], initialValue? )
 ```
 
 When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render on the component for any part of the state changed, even if the component is using only one of the properties. 
 
-This can be optimized adding a partial definition of the state to the first argument of the useSoKore hook in an array. This will performs a shallow comparison for the subset of the state determined by the partial definition. 
+This can be optimized adding a partial definer of the state to the first argument of the useSoKore hook in an array. This will performs a shallow comparison for the subset of the state determined by the partial definer. 
 
-This partial definition can be one of: 
-* An array of strings with some of the state property names.
+This partial definer can be one of: 
 * A selector function that tooks a state variable and result in an array, an object or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
 * A comparator function that tooks a prevState and a nextState variables as arguments, and must return a boolean value.
 
-**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( kore_class ) with no partial definition and the getSoKore method first.**
+**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( kore_class ) with no partial definer and the getSoKore method first.**
 
 ```tsx
 class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
@@ -256,16 +255,6 @@ class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
   subtractTables = () => this.setState( t => ({tables: t.tables - 1}) );
 
   setRooms = (n:number) => this.setState( {rooms : n} ), 
-}
-
-function Rooms() {
-  // This component re-renders only if rooms property changes
-  const [{rooms}, {setRooms}] = useSoKore([CounterKore, ["rooms"]]);
-
-  return <>
-    <span>Chairs: </span>
-    <input type="text" value={rooms} onChange={e => setRooms(e.target.value)} />
-  </> 
 }
 
 function Chairs() {
@@ -401,7 +390,7 @@ function Tables() {
   </>
 }
 ```
-**Note that the useSoKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized adding a partial definition to useSoKore first argument.**  
+**Note that the useSoKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized adding a partial definer to useSoKore first argument.**  
 **Merging mode is only for objects, and there is no check of any kind for this before doing it, so its on you to guarantee an initial and always state object.**
 
 

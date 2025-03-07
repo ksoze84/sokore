@@ -39,8 +39,8 @@ function mountLogicAssign<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatc
 function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, initial_value : J | (() => J)) : Readonly<[T, H]>
 function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
 
-function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, Array<keyof T> | CompareFunction<T>], initial_value : J | (() => J)) : Readonly<[T, H]>
-function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, Array<keyof T> | CompareFunction<T>], initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
+function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, CompareFunction<T>], initial_value : J | (() => J)) : Readonly<[T, H]>
+function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, CompareFunction<T>], initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
 
 function useSoKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, SelectorFunction<T, F>], initial_value : J | (() => J)) : Readonly<[F , H]>
 function useSoKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : [new ( s?:T ) => H, SelectorFunction<T, F>], initial_value? : J | (() => J)) : Readonly<[H extends Koreko<T, S> ? F : undefined, H]>
@@ -67,7 +67,7 @@ function useSoKore<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( k
   
   useEffect( () => mountLogicAssign( setState, koreDefinition ), [] );
 
-  return [ (kore as any)["__korekoStateDeriver_"](), kore ];
+  return [ (koreDefinition as any)[1]?.length === 1 ? (koreDefinition as any)[1](kore.state) : kore.state, kore ];
 }
 
 export { useSoKore };
