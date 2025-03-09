@@ -5,7 +5,7 @@ Simple class based hook and state manager for React.
 KeyPoints: 
 * Keep the React paradigm. If you are familiar with class components, you will be familiar with this as well.
 * Work with "Kore" extended classes. 
-  * A "kore" have a state and a setState method, write into it all state actions you need.
+  * A "kore" has a state and a setState method; write into it all state actions you need.
 * You define the class, the hook manages the rest.
 * Heavy functions are not instantiated in every render. Minimize overhead by avoiding useCallback, useReducer, useMemo, and dependency arrays.
 * Helps to separate logic from render.
@@ -61,6 +61,7 @@ function Counter() {
     - [Merging the state](#merging-the-state)
   - [Reutilizing classes](#reutilizing-classes)
   - [Extendibility and Inheritance](#extendibility-and-inheritance)
+  - [Working with data loaders](#working-with-data-loaders)
   - [Your own setState function](#your-own-setstate-function)
     - [Example with immer:](#example-with-immer)
     - [Or may be you just want to change the setState() accessibility modifier](#or-may-be-you-just-want-to-change-the-setstate-accessibility-modifier)
@@ -133,11 +134,11 @@ function Counter() {
 ## Storing and sharing : useSoKore and getSoKore
 
 The useSoKore hook and the getSoKore utility method, create, use, store, and share a unique instance of your kore class across the application, at global scope. 
-Either can update the state between components; but getSoKore is not a hook, so never trigger a re-render in the component.
+Either can update the state between components, but getSoKore is not a hook, so never trigger a re-render in the component.
 
 With the useSoKore hook, if you pass a partial definer of the state alongside the kore class as first argument, you may control when the component re-renders.  
 
-To bind the components using the useSoKore hook and/or the getSoKore method toghether, just use the same kore class.
+To bind the components using the useSoKore hook and/or the getSoKore method together, just use the same kore class.
 
 
 ### useSoKore
@@ -230,11 +231,11 @@ function useSoKore( [kore_class, partialDefiner], initialValue? )
 
 When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render on the component for any part of the state changed, even if the component is using only one of the properties. 
 
-This can be optimized adding a partial definer of the state to the first argument of the useSoKore hook in an array. This will performs a shallow comparison for the subset of the state determined by the partial definer. 
+This can be optimized by adding a partial definer of the state to the first argument of the useSoKore hook in an array. This will perform a shallow comparison for the subset of the state determined by the partial definer. 
 
 This partial definer can be one of: 
-* A selector function that tooks a state variable and result in an array, an object or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
-* A comparator function that tooks a prevState and a nextState variables as arguments, and must return a boolean value.
+* A selector function that takes a state variable and results in an array, an object, or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
+* A comparator function that takes a prevState and a nextState variables as arguments, then must return a boolean value.
 
 **Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( kore_class ) with no partial definer and the getSoKore method first.**
 
@@ -467,6 +468,23 @@ export function MyComponent() {
   useEffect( () => { load() }, [] );
 
   return ( ... );
+}
+```
+
+### Working with data loaders
+
+If you work with some framework data loader, like Remix loaders, you can use the getSoKore method to preload data, then useSoKore as usual in your component. **But it is important to not set an initial state; otherwise, this initial state will override loader data**.
+
+```tsx
+export async function clientLoader() {
+  getSoKore( ActividadesControl ).load();
+}
+
+export default function App() {
+  // state already have data here:
+  const [ {data : actividades}, {load} ] = useSoKore( ActividadesControl ); 
+
+  return (...)
 }
 ```
 
