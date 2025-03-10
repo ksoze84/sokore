@@ -24,6 +24,7 @@ SOFTWARE.
 
 import { Kore, Koreko } from "./Kore";
 
+
 export const storage = new Map<string, {kore : Kore<any, any>, listeners? : React.Dispatch<React.SetStateAction<any>>[]}>();
 
 export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreDefinition : (new ( s?:T ) => H) | [new ( s?:T ) => H, unknown] , initial_value? : T | (() => T) ) : H {
@@ -50,12 +51,13 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreDefinit
 }
 
 function destroyInstance<T, S>( kore : Kore<T, S>|Koreko<T, S> ) {
-  setTimeout(() => {  
-    if ((storage.get(kore.constructor.name)?.listeners?.length ?? 0) === 0) {
+  setTimeout(() => {
+    if (( storage.get(kore.constructor.name)?.listeners?.length ?? 0) === 0) {
       storage.delete(kore.constructor.name);
       kore["instanceDeleted"]?.();
+      console.log("Destroying instance");
     }
-  }, 200);
+  }, 5);
 }
 
 
