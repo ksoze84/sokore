@@ -477,7 +477,8 @@ If you work with some framework data loader, like Remix loaders, you can use the
 
 ```tsx
 export async function clientLoader() {
-  getSoKore( ActividadesControl ).load();
+  await getSoKore( ActividadesControl ).load();
+  return;
 }
 
 export default function App() {
