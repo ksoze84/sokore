@@ -55,7 +55,6 @@ function destroyInstance<T, S>( kore : Kore<T, S>|Koreko<T, S> ) {
     if (( storage.get(kore.constructor.name)?.listeners?.length ?? 0) === 0) {
       storage.delete(kore.constructor.name);
       kore["instanceDeleted"]?.();
-      console.log("Destroying instance");
     }
   }, 5);
 }
