@@ -50,10 +50,14 @@ function Counter() {
   - [Rules](#rules)
 - [The no-store hook: useKore](#the-no-store-hook-usekore)
   - [Example](#example-1)
+  - [useKore should update](#usekore-should-update)
 - [Storing and sharing : useSoKore and getSoKore](#storing-and-sharing--usesokore-and-getsokore)
   - [useSoKore](#usesokore)
   - [Get the instance with getSoKore](#get-the-instance-with-getsokore)
-  - [useSoKore to update only when a determined subset of state properties changes](#usesokore-to-update-only-when-a-determined-subset-of-state-properties-changes)
+  - [useSoKore selector](#usesokore-selector)
+  - [useSoKore should update](#usesokore-should-update)
+  - [useSoKore selector and should update](#usesokore-selector-and-should-update)
+  - [Example of useSoKore hook with select and should.](#example-of-usesokore-hook-with-select-and-should)
 - [The kore object](#the-kore-object)
   - [State initialization](#state-initialization)
   - [instanceCreated() function](#instancecreated-function)
@@ -94,7 +98,7 @@ npm install sokore --save
 
 ## The no-store hook: useKore
 ```js
-function useKore( kore_class, initialValue? )
+function useKore( kore_class, initialValue? ) returns [ state, kore ];
 ```
 
 This is a simple, classic-behavior custom hook that:
@@ -131,12 +135,37 @@ function Counter() {
 }
 ```
 
+### useKore should update
+
+You can use the function property **should**, that add a compare function parameter to the useKore hook.
+
+```js
+function useKore.should( kore_class, ( prevState, nextState ) => boolean , initialValue? ) returns [ state, kore ];
+```
+
+The component will trigger re-renders only if this function returns **true**:
+```tsx
+// re-renders only if counter is pair
+function Counter() {
+  const [count, {add, subtract}] = useKore.should(CounterKore, (_, n) => n % 2 == 0 );
+
+  return (
+    <div>
+      <span>{count}</span>
+      <button onClick={add}>+</button>
+      <button onClick={subtract}>-</button>
+    </div>
+  );
+}
+```
+
+
 ## Storing and sharing : useSoKore and getSoKore
 
 The useSoKore hook and the getSoKore utility method, create, use, store, and share a unique instance of your kore class across the application, at global scope. 
 Either can update the state between components, but getSoKore is not a hook, so never trigger a re-render in the component.
 
-With the useSoKore hook, if you pass a partial definer of the state alongside the kore class as first argument, you may control when the component re-renders.  
+With the useSoKore hook, if you pass a selector and/or a compare function as argument, you may control when the component re-renders.  
 
 To bind the components using the useSoKore hook and/or the getSoKore method together, just use the same kore class.
 
@@ -144,7 +173,7 @@ To bind the components using the useSoKore hook and/or the getSoKore method toge
 ### useSoKore
 
 ```js
-function useSoKore( kore_class, initialValue? )
+function useSoKore( kore_class, initialValue? ) returns [ state, kore ];
 ```
 
 This hook is equal to useKore, but store, or use an already stored, instance of your kore class and its state.
@@ -175,7 +204,7 @@ function Counter() {
 ### Get the instance with getSoKore
 
 ```js
-function getSoKore( kore_class )
+function getSoKore( kore_class ) returns kore;
 ```
 
 Get the instance of your kore using the getSoKore utility method. This method is not a hook, so it never triggers a new render. 
@@ -224,20 +253,45 @@ export function App() {
 }
 ```
 
-### useSoKore to update only when a determined subset of state properties changes
+### useSoKore selector
 ```js
-function useSoKore( [kore_class, partialDefiner], initialValue? )
+function useSoKore.select( kore_class, selector : s => f(s), initialValue? ) returns [ selector(state), kore ];
 ```
 
 When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render on the component for any part of the state changed, even if the component is using only one of the properties. 
 
-This can be optimized by adding a partial definer of the state to the first argument of the useSoKore hook in an array. This will perform a shallow comparison for the subset of the state determined by the partial definer. 
+This can be optimized using the **select** function property that adds a "selector" function parameter to the useSoKore hook. This will perform a shallow comparison for the selector results with the prev and next states. 
 
-This partial definer can be one of: 
-* A selector function that takes a state variable and results in an array, an object, or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
+This selector function that takes a state variable and results in an array, an object, or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
+
 * A comparator function that takes a prevState and a nextState variables as arguments, then must return a boolean value.
 
-**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( kore_class ) with no partial definer and the getSoKore method first.**
+**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( kore_class ) no selector and the getSoKore method first.**
+
+
+### useSoKore should update
+
+You can use the function property **should**, that add a compare function parameter to the useSoKore hook.
+
+```js
+function useSoKore.should( kore_class, ( prevState, nextState ) => boolean , initialValue? )
+```
+
+The component will trigger re-renders only if this function returns **true**
+
+
+### useSoKore selector and should update
+
+You can use the function property **selector** and **should** together, that adds a selector and a compare function parameter to the useSoKore hook.
+
+```js
+function useSoKore.selectShould( kore_class, selector : s => f(s), ( prevState, nextState ) => boolean , initialValue? ) returns [ selector(state), kore ];
+```
+
+The component will trigger re-renders only if the compare function returns **true**, **regardless of the selector function.**
+
+
+### Example of useSoKore hook with select and should.
 
 ```tsx
 class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
@@ -260,7 +314,7 @@ class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
 
 function Chairs() {
   // This component re-renders only if the compare function(prevState, nextState) returns true
-  const [{chairs},{addChairs,subtractChairs}] = useSoKore( [CounterKore, (p, n) => p.chairs !== n.chairs] ); 
+  const [{chairs},{addChairs,subtractChairs}] = useSoKore.should( CounterKore, (p, n) => p.chairs !== n.chairs ); 
 
   return <>
     <span>Chairs: {chairs}</span>
@@ -272,7 +326,7 @@ function Chairs() {
 function Tables() {
   // This component re-renders only if tables.toString() changes
   // Here tables is a string
-  const [tables, {addTables, subtractTables}] = useSoKore( [CounterKore, s => s.tables.toString()] ); 
+  const [tables, {addTables, subtractTables}] = useSoKore.select( CounterKore, s => s.tables.toString() ); 
 
   return <>
     <span>Tables: {tables}</span>
@@ -391,7 +445,7 @@ function Tables() {
   </>
 }
 ```
-**Note that the useSoKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized adding a partial definer to useSoKore first argument.**  
+**Note that the useSoKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized using select or should subfunctions**  
 **Merging mode is only for objects, and there is no check of any kind for this before doing it, so its on you to guarantee an initial and always state object.**
 
 

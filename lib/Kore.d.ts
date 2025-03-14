@@ -1,8 +1,9 @@
 export type SetStateType<T> = (value: T | Partial<T> | ((prevState: T) => T | Partial<T>)) => void;
+export declare const _koreDispatcher: unique symbol;
 /**
- * Abstract class representing a "Kore" that have a state and a setState method.  
- * This class should be extended to create a custom "kore" with actions.  
- * The extended class must be passed to the useSoKore or useKore hook to work with React.  
+ * Abstract class representing a "Kore" that have a state and a setState method.
+ * This class should be extended to create a custom "kore" with actions.
+ * The extended class must be passed to the useSoKore or useKore hook to work with React.
  * When a new instance of the class is created, the instanceCreated() method is called.
  *
  * @template T - The type of the state.
@@ -26,15 +27,15 @@ export declare abstract class Kore<T, S = SetStateType<T>> {
      */
     state?: T;
     /**
-     * Optional callback function that is called only once when an instance is created.  
-     * This Method is called by the useSoKore or useKore hook the first time a component in the application using the hook is effectively mounted and when the instance is "newly created".  
-     * Prefer this mehtod over the constructor to execute initial code.  
-     * This method has NOT the same behavior as mount callback a component in React.  
+     * Optional callback function that is called only once when an instance is created.
+     * This Method is called by the useSoKore or useKore hook the first time a component in the application using the hook is effectively mounted and when the instance is "newly created".
+     * Prefer this mehtod over the constructor to execute initial code.
+     * This method has NOT the same behavior as mount callback a component in React.
      * The only way this method is called again by the hook is destroying the instance first with destroyInstance().
      */
     protected instanceCreated?: () => void;
     /**
-     * Optional callback function that is invoked when an instance is deleted with destroyInstance().  
+     * Optional callback function that is invoked when an instance is deleted with destroyInstance().
      * This method has NOT the same behavior as unmount callback a component in React.
      */
     protected instanceDeleted?: () => void;
@@ -44,21 +45,21 @@ export declare abstract class Kore<T, S = SetStateType<T>> {
      * @param value - The new state or a function that returns the new state based on the previous state.
      */
     protected readonly _setState: SetStateType<T>;
-    private readonly __korekoDispatcher_;
+    private readonly [_koreDispatcher];
     /**
      * Sets the state and notifies all listeners. (wrapper for the actual _setState)
      *
      */
     protected setState: S;
     /**
-     * Destroys the instance if there are no active listeners.  
-     * Use this method to delete the instance **on the unmount callback** of the component using it.  
+     * Destroys the instance if there are no active listeners.
+     * Use this method to delete the instance **on the unmount callback** of the component using it.
      * Logs a warn if there are active listeners and the instance is not deleted.
      */
     destroyInstance: () => void;
     /**
-     * Constructs a new instance of the Kore class.  
-     * Prefer use the method instanceCreated() instead of the constructor.  
+     * Constructs a new instance of the Kore class.
+     * Prefer use the method instanceCreated() instead of the constructor.
      * Constructor code of the class and its inherited instances constructors are not part of the mounting/unmounting logic of react. Listeners may or may not be ready.
      *
      * @param state - The initial state.
