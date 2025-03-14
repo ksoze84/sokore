@@ -22,10 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import { Kore, Koreko } from "./Kore";
+import { _koreDispatcher, Kore, Koreko } from "./Kore";
 
+export const storage = new Map<string, {kore : Kore<any, any>, listeners? : (( p : any, n : any )=>void)[]}>();
 
-export const storage = new Map<string, {kore : Kore<any, any>, listeners? : React.Dispatch<React.SetStateAction<any>>[]}>();
+const _properInitdKoreko = Symbol( "properInitdKoreko" );
 
 export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreDefinition : (new ( s?:T ) => H) | [new ( s?:T ) => H, unknown] , initial_value? : T | (() => T) ) : H {
   const koreClass = koreDefinition instanceof Function ? koreDefinition : koreDefinition[0];
@@ -35,16 +36,16 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreDefinit
     
     storage.set( koreClass.name, {kore} );
 
-    (kore as any).__korekoDispatcher_ = (s : T) => storage.get( koreClass.name )?.listeners?.forEach( l => l( s ) );
+    (kore as any)[_koreDispatcher] = (p: T, n : T) => storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );
     (kore as any).destroyInstance = () => destroyInstance( kore );
     
     return kore;
   }
   else{
     const kore = storage.get( koreClass.name )?.kore as H;
-    if((kore as any).__properInitdKoreko_ === false && initial_value !== undefined){ 
+    if((kore as any)[_properInitdKoreko] === false && initial_value !== undefined){ 
       kore.state = initial_value instanceof Function ? initial_value() : initial_value;
-      (kore as any).__properInitdKoreko_ = true;
+      delete (kore as any)[_properInitdKoreko];
     }
     return kore
   }
@@ -56,11 +57,11 @@ function destroyInstance<T, S>( kore : Kore<T, S>|Koreko<T, S> ) {
       storage.delete(kore.constructor.name);
       kore["instanceDeleted"]?.();
     }
-  }, 5);
+  }, 0);
 }
 
 
-export function mountLogic<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, koreClass : new ( s?:T ) => H ) {
+export function mountLogic<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: (p : T, n: T ) => void, koreClass : new ( s?:T ) => H ) {
   const kore = initKore<T, S, H>( koreClass );
 
   if( !storage.get( kore.constructor.name )?.listeners ){
@@ -73,7 +74,7 @@ export function mountLogic<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( dispatche
   return () => unmountLogic( dispatcher, kore );
 }
 
-export function unmountLogic<T, S>( dispatcher: React.Dispatch<React.SetStateAction<T>>, kore: Kore<T, S>) {
+export function unmountLogic<T, S>( dispatcher: (p : T, n: T ) => void, kore: Kore<T, S>) {
   if ( ( storage.get( kore.constructor.name )?.listeners?.length ?? 0 ) > 0 ) {
     storage.get( kore.constructor.name )!.listeners = storage.get( kore.constructor.name )?.listeners?.filter( l => l !== dispatcher) ?? [] ;
       if( kore["_koreConfig"].destroyOnUnmount )
@@ -97,7 +98,7 @@ export function getSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass 
     return storage.get( koreClass.name )!.kore as H;
   else{
     const kore = initKore<T, S, H>( koreClass );
-    (kore as any).__properInitdKoreko_ = false;
+    (kore as any)[_properInitdKoreko] = false;
     return kore;
   }
 }

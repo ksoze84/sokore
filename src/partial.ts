@@ -29,36 +29,27 @@ import { mountLogic } from "./storage";
 
 export type SelectorFunction <T, F> = ( s : T ) => F;
 export type CompareFunction <T> = ( prevSTate : T, nextState : T ) => boolean;
-export type DepsOrComp<T, F> = SelectorFunction<T, F> | CompareFunction<T>;
 
-export function checkDepsSetter<T, F>( dispatcher: React.Dispatch<React.SetStateAction<T>>, deps: DepsOrComp<T, F> ) {
-  return ( newState : T ) => {
-    if ( deps.length === 1 ){
-      return dispatcher( s => {
-        const oldSelector = (deps as SelectorFunction<T, F>)( s );  
-        const newSelector = (deps as SelectorFunction<T, F>)( newState );
-        if( (newSelector === undefined) !== (oldSelector === undefined)  )
-          return newState;
-        else if( newSelector instanceof Object )
-          for( const key in newSelector ){
-            if((oldSelector as Record<any, unknown>)[key] !== (newSelector as Record<any, unknown>)[key]) 
-              return newState; 
-            }
-        else if( newSelector !== oldSelector )
-          return newState;
-        return s;
-      });
-    }
-    else{
-      return dispatcher( s => {
-        if( (deps as CompareFunction<T>)( s, newState ) )
-          return newState;
-        return s;
-      } );
-    }
+export function checkDepsSetter<T, F>( dispatcher: React.Dispatch<React.SetStateAction<T>>, selector?: SelectorFunction<T, F>, compare? : CompareFunction<T>) : void | ((p : T, n: T) => void) {
+  if(compare)
+    return ( oldState : T, newState : T ) => compare( oldState, newState ) && dispatcher (newState);
+  else if (selector) {
+      return ( oldState : T, newState : T, ) => {
+      const oldSelector = selector( oldState );  
+      const newSelector = selector( newState );
+      if( (newSelector === undefined) !== (oldSelector === undefined)  )
+        dispatcher (newState);
+      else if( newSelector instanceof Object )
+        for( const key in newSelector ){
+          if((oldSelector as Record<any, unknown>)[key] !== (newSelector as Record<any, unknown>)[key]) 
+            dispatcher (newState);
+          }
+      else if( newSelector !== oldSelector )
+        dispatcher (newState);
+    }    
   }
 }
 
-export function partialMountLogic<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, handlerClass : new ( s?:T ) => H, deps: DepsOrComp<T, F>) {
-  return mountLogic( checkDepsSetter( dispatcher, deps ) as React.Dispatch<React.SetStateAction<T>>, handlerClass );
+export function partialMountLogic<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, handlerClass : new ( s?:T ) => H, selector?: SelectorFunction<T, F>, compare?: CompareFunction<T>) {
+  return mountLogic( checkDepsSetter( dispatcher, selector, compare ) as (p : T, n: T) => void, handlerClass );
 }

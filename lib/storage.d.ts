@@ -1,14 +1,13 @@
-/// <reference types="react" />
 import { Kore, Koreko } from "./Kore";
 export declare const storage: Map<string, {
     kore: Kore<any, any>;
-    listeners?: import("react").Dispatch<any>[] | undefined;
+    listeners?: ((p: any, n: any) => void)[];
 }>;
 export declare function initKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreDefinition: (new (s?: T) => H) | [new (s?: T) => H, unknown], initial_value?: T | (() => T)): H;
-export declare function mountLogic<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(dispatcher: React.Dispatch<React.SetStateAction<T>>, koreClass: new (s?: T) => H): () => void;
-export declare function unmountLogic<T, S>(dispatcher: React.Dispatch<React.SetStateAction<T>>, kore: Kore<T, S>): void;
+export declare function mountLogic<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(dispatcher: (p: T, n: T) => void, koreClass: new (s?: T) => H): () => void;
+export declare function unmountLogic<T, S>(dispatcher: (p: T, n: T) => void, kore: Kore<T, S>): void;
 /**
- * Gets the instance of the Kore class.  
+ * Gets the instance of the Kore class.
  * This is not a hook. It will not trigger re-renders when used in components.
  *
  * @template T - The type of the state.

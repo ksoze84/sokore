@@ -24,12 +24,13 @@ SOFTWARE.
 
 
 import React, { useEffect } from "react";
-import { Kore, Koreko } from "./Kore";
+import { _koreDispatcher, Kore, Koreko } from "./Kore";
+import { CompareFunction } from "./partial";
 
-function initSimpleKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H, initial_value: T | (() => T), getSetState: () => React.Dispatch<React.SetStateAction<T>>) {
+function initSimpleKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H, initial_value: T | (() => T), getSetState: () => React.Dispatch<React.SetStateAction<T>>, compare?: CompareFunction<T>) {
   const kore = new koreClass(initial_value instanceof Function ? initial_value() : initial_value);
 
-  (kore as any).__korekoDispatcher_ = (s : T) => getSetState()(s);
+  (kore as any)[_koreDispatcher] = compare ? (prevState : T, newState : T) => ( compare(prevState, newState) && getSetState()(newState) ) : ((s : T) => getSetState()(s) ) ;
   (kore as any).destroyInstance = () => kore["instanceDeleted"]?.();
 
   return kore;
@@ -40,22 +41,22 @@ function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreCl
 
 /**
  * 
- * Hook to manage state with a handler class. The handler class must extend `StateHandler<T>`.  
+ * Hook to manage state with a kore class. The kore class must extend `Kore<T>`.  
  * Standalone hook, doesn't persist nor share state with other hooks.
- * Do not modify the handler state directly. Use the handler setState method instead.  
+ * Do not modify the kore state directly. Use the kore setState method instead.  
  *
  * @template T - The type of the state.
  * @template S - The type of the setState.
- * @template H - The type of the handler class, which extends `StateHandler<T>`
+ * @template H - The type of the kore class, which extends `Kore<T>`
  * 
- * @param koreClass - The class of the handler to be used for managing state.
+ * @param koreClass - The class of the kore to be used for managing state.
  * @param initial_value - Optional. The initial value of the state, which can be a value of type `T` or a function that returns a value of type `T`.
  * 
- * @returns A readonly tuple containing the current state and the handler instance.
+ * @returns A readonly tuple containing the current state and the kore instance.
  */
-function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, initial_value: J | (() => J)) : Readonly<[T | undefined, H]>  {
-  const [kore, ]                      = React.useState<Kore<T, S>>( () : H => initSimpleKore<T, S, H>(koreClass, initial_value, () => setState ) );
-  const [, setState]                  = React.useState<T>( kore.state as T );    
+function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, initial_value: J | (() => J), compare? : CompareFunction<T>) : Readonly<[T | undefined, H]>  {
+  const [kore, ]                      = React.useState<Kore<T, S>>( () : H => initSimpleKore<T, S, H>(koreClass, initial_value, () => set_state, compare ) );
+  const [_state, set_state]           = React.useState<T>( kore.state as T );    
   
   useEffect(() => {
     kore["instanceCreated"]?.();
@@ -64,6 +65,35 @@ function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreCl
 
   return [ kore.state, kore as H ];
 }
+
+function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T, H]>
+function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
+
+
+/**
+ * 
+ * `should` add a compare function parameter to the useSokore hook.
+ * If this compare function returns true, the state will updated in the component, triggering a re-render.
+ * Hook to manage state with a kore class. The kore class must extend `Kore<T>`.  
+ * This hook will maintain only one instance of the class per application at a time and will be shared between all components that use the [useSokore, Kore Class] pair, storing its state.  
+ * Do not modify the kore state directly. Use the kore setState method instead.
+ *
+ * @template T - The type of the state.
+ * @template S - The type of the setState.
+ * @template H - The type of the kore class, which extends `Kore<T>`
+ * 
+ * @param koreClass - The class of the kore to be used for managing state.
+ * @param compare - A function that takes the current state and the new state and returns true if the new state is different from the current state.
+ * @param initial_value - Optional. The initial value of the state, which can be a value of type `T` or a function that returns a value of type `T`.
+ * 
+ * @returns A readonly tuple containing the current state and the kore instance.
+ */
+function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T|undefined, H]> {
+  return (useKore as any)( koreDefinition, initial_value, compare );
+}
+
+useKore.should = useKoreCompare;
+
 
 export { useKore };
 
