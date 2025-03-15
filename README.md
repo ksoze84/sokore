@@ -261,11 +261,9 @@ function useSoKore.select( koreClass, s => f(s), iniVal? ) returns [ f(s), kore 
 
 When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render on the component for any part of the state changed, even if the component is using only one of the properties. 
 
-This can be optimized using the **select** function property that adds a "selector" function parameter to the useSoKore hook. This will perform a shallow comparison for the selector results with the prev and next states. 
+This can be optimized using the **select** function property that adds a "selector" function parameter to the useSoKore hook. This will perform a shallow comparison for the selector results with the prev and next states and will trigger a re-render only if these results are different. 
 
 This selector function that takes a state variable and results in an array, an object, or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
-
-* A comparator function that takes a prevState and a nextState variables as arguments, then must return a boolean value.
 
 **Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( koreClass ) no selector and the getSoKore method first.**
 
@@ -289,7 +287,7 @@ You can use the function property **selector** and **should** together, that add
 function useSoKore.selectShould( koreClass, s => f(s), ( p, n ) => boolean , iniVal? ) returns [ f(s), kore ];
 ```
 
-The component will trigger re-renders only if the compare function returns **true**, **regardless of the selector function.**
+In this case the component will trigger re-renders only if the compare function returns **true**, **regardless of the selector function.**
 
 
 ### Example of useSoKore hook with select and should.
@@ -456,7 +454,7 @@ Tries to delete the instance in each unmount of each component. Is successfully 
 
 Use with caution. Enabling this option can cause unexpected behavior with React.StrictMode, on developing environment.
 
-Prefer resetState, or destroyInstance()
+Prefer reset the state, or destroyInstance()
 
 ### Reutilizing classes
 
@@ -602,12 +600,15 @@ public setState = this._setState
 
 ### Destroying the instance
 
-You may destroy the instance when needed using the **destroyInstance(force?)** method. This method must be called **on the unmount callback** of the component using it.  
+```tsx
+kore.destroyInstance(force?: boolean) => void
+```
+
+You may destroy the stored instance when needed using the **destroyInstance(force?)** method. This method must be called **on the unmount callback** of the component using it.  
 This method first checks if there are active state hook listeners active. If there isn't, the instance reference is deleted, and the **instanceDeleted()** method is called if exists. If **force** parameter is true, deletes the instance without checking anything (force destroy with caution).
 
 If you implement **instanceDeleted()**, remember that it is not the equivalent of an unmount component callback.
 
-This is not neccesary if the kore option destroyOnUnmount is true, nor with the no-store useKore hook. 
 
 ```tsx
 export function App() {
