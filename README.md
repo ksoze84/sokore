@@ -263,7 +263,7 @@ When a non-undefined object with many properties is used as state, the useSoKore
 
 This can be optimized using the **select** function property that adds a "selector" function parameter to the useSoKore hook. This will perform a shallow comparison for the selector results with the prev and next states and will trigger a re-render only if these results are different. 
 
-This selector function that takes a state variable and results in an array, an object, or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
+The selector must be a function that takes the state and transfoms it in an array, an object, or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
 
 **Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( koreClass ) no selector and the getSoKore method first.**
 
