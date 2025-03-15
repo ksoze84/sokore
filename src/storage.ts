@@ -28,16 +28,14 @@ export const storage = new Map<string, {kore : Kore<any, any>, listeners? : (( p
 
 const _properInitdKoreko = Symbol( "properInitdKoreko" );
 
-export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreDefinition : (new ( s?:T ) => H) | [new ( s?:T ) => H, unknown] , initial_value? : T | (() => T) ) : H {
-  const koreClass = koreDefinition instanceof Function ? koreDefinition : koreDefinition[0];
-
+export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H , initial_value? : T | (() => T) ) : H {
   if ( !storage.has( koreClass.name ) ) {
     const kore = new koreClass( initial_value instanceof Function ? initial_value() : initial_value );
     
     storage.set( koreClass.name, {kore} );
 
     (kore as any)[_koreDispatcher] = (p: T, n : T) => storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );
-    (kore as any).destroyInstance = () => destroyInstance( kore );
+    (kore as any).destroyInstance = (force? : boolean) => destroyInstance( kore, force );
     
     return kore;
   }
@@ -51,13 +49,11 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreDefinit
   }
 }
 
-function destroyInstance<T, S>( kore : Kore<T, S>|Koreko<T, S> ) {
-  setTimeout(() => {
-    if (( storage.get(kore.constructor.name)?.listeners?.length ?? 0) === 0) {
-      storage.delete(kore.constructor.name);
-      kore["instanceDeleted"]?.();
-    }
-  }, 0);
+function destroyInstance<T, S>( kore : Kore<T, S>|Koreko<T, S>, force? : boolean ) {
+  if (force === true || ( storage.get(kore.constructor.name)?.listeners?.length ?? 0) === 0) {
+    storage.delete(kore.constructor.name);
+    kore["instanceDeleted"]?.();
+  }
 }
 
 

@@ -91,7 +91,7 @@ function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J exten
  * 
  * @returns A readonly tuple containing the current `selector(state)` and the handler instance.
  */
-function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : ( new ( s?:T ) => H ), selector : SelectorFunction<T, F>, initial_value: J | (() => J), compare? : CompareFunction<T> )  :  Readonly<[ (T | F | undefined), H]> {
+function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, selector : SelectorFunction<T, F>, initial_value: J | (() => J), compare? : CompareFunction<T> )  :  Readonly<[ (T | F | undefined), H]> {
   const kore                        = initKore<T, S, H>( koreClass, initial_value );
   const [_state, set_state]         = React.useState<T>( kore.state as T );    
 

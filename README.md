@@ -63,6 +63,7 @@ function Counter() {
   - [instanceCreated() function](#instancecreated-function)
   - [kore object configuration](#kore-object-configuration)
     - [Merging the state](#merging-the-state)
+    - [destroyOnUnmount option](#destroyonunmount-option)
   - [Reutilizing classes](#reutilizing-classes)
   - [Extendibility and Inheritance](#extendibility-and-inheritance)
   - [Working with data loaders](#working-with-data-loaders)
@@ -98,7 +99,7 @@ npm install sokore --save
 
 ## The no-store hook: useKore
 ```js
-function useKore( kore_class, initialValue? ) returns [ state, kore ];
+function useKore( koreClass, iniVal? ) returns [ state, kore ];
 ```
 
 This is a simple, classic-behavior custom hook that:
@@ -140,10 +141,10 @@ function Counter() {
 You can use the function property **should**, that add a compare function parameter to the useKore hook.
 
 ```js
-function useKore.should( kore_class, ( prevState, nextState ) => boolean , initialValue? ) returns [ state, kore ];
+function useKore.should( koreClass, ( prev, next ) => boolean , iniVal? ) returns [ state, kore ];
 ```
 
-The component will trigger re-renders only if this function returns **true**:
+The component will trigger re-renders only if this function returns **true**. Parameters are previous state and next state.
 ```tsx
 // re-renders only if counter is pair
 function Counter() {
@@ -173,7 +174,7 @@ To bind the components using the useSoKore hook and/or the getSoKore method toge
 ### useSoKore
 
 ```js
-function useSoKore( kore_class, initialValue? ) returns [ state, kore ];
+function useSoKore( koreClass, iniVal? ) returns [ state, kore ];
 ```
 
 This hook is equal to useKore, but store, or use an already stored, instance of your kore class and its state.
@@ -255,7 +256,7 @@ export function App() {
 
 ### useSoKore selector
 ```js
-function useSoKore.select( kore_class, selector : s => f(s), initialValue? ) returns [ selector(state), kore ];
+function useSoKore.select( koreClass, s => f(s), iniVal? ) returns [ f(s), kore ];
 ```
 
 When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render on the component for any part of the state changed, even if the component is using only one of the properties. 
@@ -266,15 +267,15 @@ This selector function that takes a state variable and results in an array, an o
 
 * A comparator function that takes a prevState and a nextState variables as arguments, then must return a boolean value.
 
-**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( kore_class ) no selector and the getSoKore method first.**
+**Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( koreClass ) no selector and the getSoKore method first.**
 
 
 ### useSoKore should update
 
-You can use the function property **should**, that add a compare function parameter to the useSoKore hook.
+You can use the function property **should**, that add a compare function parameter to the useSoKore hook. Parameters are previous state and next state.
 
 ```js
-function useSoKore.should( kore_class, ( prevState, nextState ) => boolean , initialValue? )
+function useSoKore.should( koreClass, ( prev, next ) => boolean , iniVal? ) returns [ state, kore ]
 ```
 
 The component will trigger re-renders only if this function returns **true**
@@ -285,7 +286,7 @@ The component will trigger re-renders only if this function returns **true**
 You can use the function property **selector** and **should** together, that adds a selector and a compare function parameter to the useSoKore hook.
 
 ```js
-function useSoKore.selectShould( kore_class, selector : s => f(s), ( prevState, nextState ) => boolean , initialValue? ) returns [ selector(state), kore ];
+function useSoKore.selectShould( koreClass, s => f(s), ( p, n ) => boolean , iniVal? ) returns [ f(s), kore ];
 ```
 
 The component will trigger re-renders only if the compare function returns **true**, **regardless of the selector function.**
@@ -449,6 +450,14 @@ function Tables() {
 **Merging mode is only for objects, and there is no check of any kind for this before doing it, so its on you to guarantee an initial and always state object.**
 
 
+#### destroyOnUnmount option
+
+Tries to delete the instance in each unmount of each component. Is successfully deleted if there are no active listeners (other components using it).
+
+Use with caution. Enabling this option can cause unexpected behavior with React.StrictMode, on developing environment.
+
+Prefer resetState, or destroyInstance()
+
 ### Reutilizing classes
 
 Classes are made for reutilization, making new object instances from these. But in this case, the instance creation is managed by the hook, and it maintains only one instance per class name. 
@@ -593,8 +602,8 @@ public setState = this._setState
 
 ### Destroying the instance
 
-You may destroy the instance when needed using the **destroyInstance()** method. This method must be called **on the unmount callback** of the component using it.  
-This method first checks if there are active state hook listeners active. If there isn't, the instance reference is deleted, and the **instanceDeleted()** method is called if exists.
+You may destroy the instance when needed using the **destroyInstance(force?)** method. This method must be called **on the unmount callback** of the component using it.  
+This method first checks if there are active state hook listeners active. If there isn't, the instance reference is deleted, and the **instanceDeleted()** method is called if exists. If **force** parameter is true, deletes the instance without checking anything (force destroy with caution).
 
 If you implement **instanceDeleted()**, remember that it is not the equivalent of an unmount component callback.
 
