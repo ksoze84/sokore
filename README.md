@@ -205,7 +205,7 @@ function Counter() {
 ### Get the instance with getSoKore
 
 ```js
-function getSoKore( kore_class ) returns kore;
+function getSoKore( koreClass ) returns kore;
 ```
 
 Get the instance of your kore using the getSoKore utility method. This method is not a hook, so it never triggers a new render. 
@@ -452,7 +452,7 @@ function Tables() {
 
 Tries to delete the instance in each unmount of each component. Is successfully deleted if there are no active listeners (other components using it).
 
-Use with caution. Enabling this option can cause unexpected behavior with React.StrictMode, on developing environment.
+Use with caution. Enabling this option can cause unexpected behavior with React.StrictMode on a development environment.
 
 Prefer reset the state, or destroyInstance()
 
@@ -604,7 +604,7 @@ public setState = this._setState
 kore.destroyInstance(force?: boolean) => void
 ```
 
-You may destroy the stored instance when needed using the **destroyInstance(force?)** method. This method must be called **on the unmount callback** of the component using it.  
+You may destroy the stored instance when needed using the **destroyInstance(force?)** method. This method should be called **on the unmount callback** of the component using it, or before loading a new component.  
 This method first checks if there are active state hook listeners active. If there isn't, the instance reference is deleted, and the **instanceDeleted()** method is called if exists. If **force** parameter is true, deletes the instance without checking anything (force destroy with caution).
 
 If you implement **instanceDeleted()**, remember that it is not the equivalent of an unmount component callback.

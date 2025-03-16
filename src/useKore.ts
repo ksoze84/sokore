@@ -72,16 +72,7 @@ function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreCl
 function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T, H]>
 function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
 
-
-function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T|undefined, H]> {
-  return (useKore as any)( koreDefinition, initial_value, compare );
-}
-
-useKore.should = useKoreCompare;
-
-
-declare namespace useKore {
-  /**
+/**
  * 
  * `useKore.should` add a compare function as second parameter to the useSokore hook.  
  * If this compare function returns true, the state will updated in the component, triggering a re-render.  
@@ -96,8 +87,11 @@ declare namespace useKore {
  * 
  * @returns A readonly tuple containing the current state and the kore instance.
  */
-  let should: typeof useKoreCompare;
+function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T|undefined, H]> {
+  return (useKore as any)( koreDefinition, initial_value, compare );
 }
+
+useKore.should = useKoreCompare;
 
 export { useKore };
 

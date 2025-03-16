@@ -45,8 +45,7 @@ function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( kore
 /**
  * 
  * Hook to manage state with a kore class. The handler class must extend `Kore<T>`.  
- * This hook will maintain only one instance of the class per application at a time and will be shared between all components that use the [useSokore, Kore Class] pair, storing its state.  
- * Do not modify the handler state directly. Use the handler setState method instead.
+ * This hook will maintain only one instance of the class per application at a time and will be stored and shared.
  *
  * @template T - The type of the state.
  * @template S - The type of the setState.
@@ -74,11 +73,9 @@ function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J exten
 
 /**
  * 
- * `selector` add a selector function parameter to the useSokore hook.	
- * A selector function takes the current state and returns something of type `F`.
- * Hook to manage state with a kore class. The handler class must extend `Kore<T>`.  
- * This hook will maintain only one instance of the class per application at a time and will be shared between all components that use the [useSokore, Kore Class] pair, storing its state.  
- * Do not modify the handler state directly. Use the handler setState method instead.
+ * `useSoKore.select` add a selector function as a second parameter to the useSokore hook.	
+ * A selector function takes the current state and returns something of type `F`.  
+ * Triggers a re-render only if the selector returns a different value than the previous one.
  *
  * @template T - The type of the state.
  * @template F - The return type of the selector.
@@ -104,16 +101,13 @@ function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J exten
 useSoKore.select = useSoKoreSelector;
 
 
-function useSokoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T, H]>
-function useSokoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
+function useSoKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T, H]>
+function useSoKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
 
 /**
  * 
- * `should` add a compare function parameter to the useSokore hook.
+ * `useSoKore.should` add a compare function as a second parameter to the useSokore hook.  
  * If this compare function returns true, the state will updated in the component, triggering a re-render.
- * Hook to manage state with a kore class. The handler class must extend `Kore<T>`.  
- * This hook will maintain only one instance of the class per application at a time and will be shared between all components that use the [useSokore, Kore Class] pair, storing its state.  
- * Do not modify the handler state directly. Use the handler setState method instead.
  *
  * @template T - The type of the state.
  * @template S - The type of the setState.
@@ -125,11 +119,11 @@ function useSokoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T
  * 
  * @returns A readonly tuple containing the current state and the handler instance.
  */
-function useSokoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T|undefined, H]> {
+function useSoKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T|undefined, H]> {
   return (useSoKore as any)( koreDefinition, initial_value, compare );
 }
 
-useSoKore.should = useSokoreCompare;
+useSoKore.should = useSoKoreCompare;
 
 
 
@@ -138,12 +132,9 @@ function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J 
 
 /**
  * 
- * `selectShould` add a selector function parameter and a compare function parameter to the useSokore hook.  
- * A selector function takes the current state and returns something of type `F`.
- * If this compare function returns true, the state will updated in the component, triggering a re-render.
- * Hook to manage state with a kore class. The handler class must extend `Kore<T>`.  
- * This hook will maintain only one instance of the class per application at a time and will be shared between all components that use the [useSokore, Kore Class] pair, storing its state.  
- * Do not modify the handler state directly. Use the handler setState method instead.
+ * `useSokore.selectShould` add a selector function parameter and a compare function parameter to the useSokore hook.  
+ * A selector function takes the current state and returns something of type `F`.  
+ * If the compare function returns true, the state will updated in the component, triggering a re-render.
  *
  * @template T - The type of the state.
  * @template F - The return type of the selector.
