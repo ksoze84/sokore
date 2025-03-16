@@ -49,7 +49,7 @@ export abstract class Kore<T, S = SetStateType<T>> {
    * @protected
    * @readonly
    */
-  protected readonly _koreConfig : {merge? : boolean, destroyOnUnmount? : boolean} = { merge : false, destroyOnUnmount : false };
+  protected readonly _koreConfig : {merge? : boolean, destroyOnUnmount? : boolean} = { };
 
   /**
    * The current state. Do not set this property directly. Use the setState method instead.  
@@ -85,7 +85,7 @@ export abstract class Kore<T, S = SetStateType<T>> {
   };
 
 
-  private readonly [_koreDispatcher] : (p: T, n? : T) => void = () => {}
+  private readonly [_koreDispatcher] : (p: T, n? : T) => void = undefined as any;
 
 
 
@@ -103,7 +103,7 @@ export abstract class Kore<T, S = SetStateType<T>> {
    * 
    * @param force - If true, the instance is deleted even if there are active listeners.
    */
-  public destroyInstance = (_force? : boolean) => {};
+  public destroyInstance : (_force? : boolean) => void = undefined as any;
 
   /**
    * Constructs a new instance of the Kore class.  

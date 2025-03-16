@@ -26,7 +26,6 @@ SOFTWARE.
 import React, { useEffect } from "react";
 import { _koreDispatcher, Kore, Koreko } from "./Kore";
 import { CompareFunction } from "./partial";
-import { prototype } from "events";
 
 function initSimpleKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H, initial_value: T | (() => T), getSetState: () => React.Dispatch<React.SetStateAction<T>>, compare?: CompareFunction<T>) {
   const kore = new koreClass(initial_value instanceof Function ? initial_value() : initial_value);
@@ -44,7 +43,6 @@ function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreCl
  * 
  * Hook to manage state with a kore class. The kore class must extend `Kore<T>`.  
  * Standalone hook, doesn't persist nor share state with other hooks.
- * Do not modify the kore state directly. Use the kore setState method instead.  
  *
  * @template T - The type of the state.
  * @template S - The type of the setState.
@@ -75,24 +73,6 @@ function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>(
 function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? T : T | undefined, H]>
 
 
-/**
- * 
- * `should` add a compare function parameter to the useSokore hook.
- * If this compare function returns true, the state will updated in the component, triggering a re-render.
- * Hook to manage state with a kore class. The kore class must extend `Kore<T>`.  
- * This hook will maintain only one instance of the class per application at a time and will be shared between all components that use the [useSokore, Kore Class] pair, storing its state.  
- * Do not modify the kore state directly. Use the kore setState method instead.
- *
- * @template T - The type of the state.
- * @template S - The type of the setState.
- * @template H - The type of the kore class, which extends `Kore<T>`
- * 
- * @param koreClass - The class of the kore to be used for managing state.
- * @param compare - A function that takes the current state and the new state and returns true if the new state is different from the current state.
- * @param initial_value - Optional. The initial value of the state, which can be a value of type `T` or a function that returns a value of type `T`.
- * 
- * @returns A readonly tuple containing the current state and the kore instance.
- */
 function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T|undefined, H]> {
   return (useKore as any)( koreDefinition, initial_value, compare );
 }
@@ -103,9 +83,8 @@ useKore.should = useKoreCompare;
 declare namespace useKore {
   /**
  * 
- * `useKore.should` add a compare function parameter to the useSokore hook.  
+ * `useKore.should` add a compare function as second parameter to the useSokore hook.  
  * If this compare function returns true, the state will updated in the component, triggering a re-render.  
- * Hook to manage state with a kore class. The kore class must extend `Kore<T>`.  
  *
  * @template T - The type of the state.
  * @template S - The type of the setState.
@@ -113,7 +92,7 @@ declare namespace useKore {
  * 
  * @param koreClass - The class of the kore to be used for managing state.
  * @param compare - A function that takes the current state and the new state and returns true if the new state is different from the current state.
- * @param {string} initial_value - Optional. The initial value of the state, which can be a value of type `T` or a function that returns a value of type `T`.
+ * @param initial_value - Optional. The initial value of the state, which can be a value of type `T` or a function that returns a value of type `T`.
  * 
  * @returns A readonly tuple containing the current state and the kore instance.
  */
