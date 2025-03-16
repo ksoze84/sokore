@@ -26,6 +26,7 @@ SOFTWARE.
 import React, { useEffect } from "react";
 import { _koreDispatcher, Kore, Koreko } from "./Kore";
 import { CompareFunction } from "./partial";
+import { prototype } from "events";
 
 function initSimpleKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H, initial_value: T | (() => T), getSetState: () => React.Dispatch<React.SetStateAction<T>>, compare?: CompareFunction<T>) {
   const kore = new koreClass(initial_value instanceof Function ? initial_value() : initial_value);
@@ -64,6 +65,10 @@ function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreCl
   }, [])
 
   return [ kore.state, kore as H ];
+
+
+  
+
 }
 
 function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T, H]>
@@ -94,6 +99,26 @@ function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>(
 
 useKore.should = useKoreCompare;
 
+
+declare namespace useKore {
+  /**
+ * 
+ * `useKore.should` add a compare function parameter to the useSokore hook.  
+ * If this compare function returns true, the state will updated in the component, triggering a re-render.  
+ * Hook to manage state with a kore class. The kore class must extend `Kore<T>`.  
+ *
+ * @template T - The type of the state.
+ * @template S - The type of the setState.
+ * @template H - The type of the kore class, which extends `Kore<T>`
+ * 
+ * @param koreClass - The class of the kore to be used for managing state.
+ * @param compare - A function that takes the current state and the new state and returns true if the new state is different from the current state.
+ * @param {string} initial_value - Optional. The initial value of the state, which can be a value of type `T` or a function that returns a value of type `T`.
+ * 
+ * @returns A readonly tuple containing the current state and the kore instance.
+ */
+  let should: typeof useKoreCompare;
+}
 
 export { useKore };
 
