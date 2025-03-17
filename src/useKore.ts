@@ -30,7 +30,9 @@ import { CompareFunction } from "./partial";
 function initSimpleKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H, initial_value: T | (() => T), getSetState: () => React.Dispatch<React.SetStateAction<T>>, compare?: CompareFunction<T>) {
   const kore = new koreClass(initial_value instanceof Function ? initial_value() : initial_value);
 
-  (kore as any)[_koreDispatcher] = compare ? (prevState : T, newState : T) => ( compare(prevState, newState) && getSetState()(newState) ) : ((s : T) => getSetState()(s) ) ;
+  console.log(compare);
+
+  (kore as any)[_koreDispatcher] = compare ? (prevState : T, newState : T) => ( compare(prevState, newState) && getSetState()(newState) ) : ((_ :T, s : T) => getSetState()(s) ) ;
   (kore as any).destroyInstance = () => kore["instanceDeleted"]?.();
 
   return kore;
@@ -59,7 +61,7 @@ function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreCl
   
   useEffect(() => {
     kore["instanceCreated"]?.();
-    return () => kore.destroyInstance()
+    return () => kore.destroyInstance();
   }, [])
 
   return [ kore.state, kore as H ];

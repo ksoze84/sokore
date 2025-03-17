@@ -32,24 +32,23 @@ export type CompareFunction <T> = ( prevSTate : T, nextState : T ) => boolean;
 
 export function checkDepsSetter<T, F>( dispatcher: React.Dispatch<React.SetStateAction<T>>, selector?: SelectorFunction<T, F>, compare? : CompareFunction<T>) : void | ((p : T, n: T) => void) {
   if(compare)
-    return ( oldState : T, newState : T ) => compare( oldState, newState ) && dispatcher (newState);
-  else if (selector) {
-      return ( oldState : T, newState : T, ) => {
+    return ( oldState : T, newState : T ) => compare( oldState, newState ) && dispatcher(newState);
+  else if (selector)
+    return ( oldState : T, newState : T, ) => {
       const oldSelector = selector( oldState );  
       const newSelector = selector( newState );
       if( (newSelector === undefined) !== (oldSelector === undefined)  )
-        dispatcher (newState);
+        dispatcher(newState);
       else if( newSelector instanceof Object )
         for( const key in newSelector ){
           if((oldSelector as Record<any, unknown>)[key] !== (newSelector as Record<any, unknown>)[key]) 
-            dispatcher (newState);
+            dispatcher(newState);
           }
       else if( newSelector !== oldSelector )
-        dispatcher (newState);
+        dispatcher(newState);
     }    
-  }
 }
 
 export function partialMountLogic<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, handlerClass : new ( s?:T ) => H, selector?: SelectorFunction<T, F>, compare?: CompareFunction<T>) {
-  return mountLogic( checkDepsSetter( dispatcher, selector, compare ) as (p : T, n: T) => void, handlerClass );
+  return mountLogic( checkDepsSetter( dispatcher, selector, compare ) as (p : T, n: T) => void, dispatcher, handlerClass );
 }

@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { _koreDispatcher, Kore, Koreko } from "./Kore";
 
-export const storage = new Map<string, {kore : Kore<any, any>, listeners? : (( p : any, n : any )=>void)[]}>();
+export const storage = new Map<string, {kore : Kore<any, any>, listeners? : Map<Function, ( p : any, n : any )=>void>}>();
 
 const _properInitdKoreko = Symbol( "properInitdKoreko" );
 
@@ -34,7 +34,10 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
     
     storage.set( koreClass.name, {kore} );
 
-    (kore as any)[_koreDispatcher] = (p: T, n : T) => storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );
+    (kore as any)[_koreDispatcher] = (p: T, n : T) => {
+      console.log(p, n);
+      console.log(storage.get( koreClass.name )?.listeners);
+      storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );}
     (kore as any).destroyInstance = (force? : boolean) => destroyInstance( kore, force );
     
     return kore;
@@ -50,29 +53,30 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
 }
 
 function destroyInstance<T, S>( kore : Kore<T, S>|Koreko<T, S>, force? : boolean ) {
-  if (force === true || ( storage.get(kore.constructor.name)?.listeners?.length ?? 0) === 0) {
+  if (force === true || ( storage.get(kore.constructor.name)?.listeners?.size ?? 0) === 0) {
     storage.delete(kore.constructor.name);
     kore["instanceDeleted"]?.();
   }
 }
 
 
-export function mountLogic<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: (p : T, n: T ) => void, koreClass : new ( s?:T ) => H ) {
+export function mountLogic<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: (p : T, n: T ) => void, dispatcherRef : Function, koreClass : new ( s?:T ) => H ) {
   const kore = initKore<T, S, H>( koreClass );
 
   if( !storage.get( kore.constructor.name )?.listeners ){
-    storage.get( kore.constructor.name )!.listeners = [ dispatcher ] ;
+    storage.get( kore.constructor.name )!.listeners = new Map<Function, ( p : any, n : any )=>void>();
+    storage.get( kore.constructor.name )!.listeners!.set( dispatcherRef, dispatcher );
     kore["instanceCreated"]?.();
   }
   else
-    storage.get( kore.constructor.name )?.listeners!.push( dispatcher );
+    storage.get( kore.constructor.name )?.listeners!.set( dispatcherRef, dispatcher );
 
-  return () => unmountLogic( dispatcher, kore );
+  return () => unmountLogic( dispatcherRef, kore );
 }
 
-export function unmountLogic<T, S>( dispatcher: (p : T, n: T ) => void, kore: Kore<T, S>) {
-  if ( ( storage.get( kore.constructor.name )?.listeners?.length ?? 0 ) > 0 ) {
-    storage.get( kore.constructor.name )!.listeners = storage.get( kore.constructor.name )?.listeners?.filter( l => l !== dispatcher) ?? [] ;
+export function unmountLogic<T, S>( dispatcherRef : Function, kore: Kore<T, S>) {
+  if ( ( storage.get( kore.constructor.name )?.listeners?.size ?? 0 ) > 0 ) {
+    storage.get( kore.constructor.name )!.listeners?.delete( dispatcherRef );
       if( kore["_koreConfig"].destroyOnUnmount )
         kore.destroyInstance();
   }

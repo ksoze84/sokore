@@ -78,14 +78,14 @@ export abstract class Kore<T, S = SetStateType<T>> {
    * @param value - The new state or a function that returns the new state based on the previous state.
    */
   protected readonly _setState : SetStateType<T> = (value: T | Partial<T> | ((prevState: T) => T | Partial<T>)) => {
-    const prevState = this.state as T;
-    const newState = value instanceof Function ? value(this.state as T) : value;
-    this.state = (this._koreConfig.merge ? { ...this.state, ...newState } : newState) as T;
-    this[_koreDispatcher](prevState, this.state);
+    const oldState = this.state as T;
+    const newState = value instanceof Function ? value(oldState) : value;
+    this.state = (this._koreConfig.merge ? { ...oldState, ...newState } : newState) as T;
+    this[_koreDispatcher](oldState, this.state);
   };
 
 
-  private readonly [_koreDispatcher] : (p: T, n? : T) => void = undefined as any;
+  private readonly [_koreDispatcher] : (p: T, n : T) => void = undefined as any;
 
 
 

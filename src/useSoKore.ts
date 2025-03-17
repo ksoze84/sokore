@@ -33,7 +33,7 @@ export function mountLogicAssign<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( 
   if (selector || compare)
     return partialMountLogic( dispatcher, koreClass, selector, compare  );
   else
-    return mountLogic( (_, n : T) => dispatcher(n), koreClass );
+    return mountLogic( (_f : T , n : T) => dispatcher(n), dispatcher, koreClass );
     
 }
 
@@ -56,7 +56,7 @@ function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( kore
  * 
  * @returns A readonly tuple containing the current state and the handler instance.
  */
-function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, initial_value: J | (() => J), compare? : CompareFunction<T>  )  :  Readonly<[ (T | undefined), H]> {
+function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, initial_value?: J | (() => J), compare? : CompareFunction<T>  )  :  Readonly<[ (T | undefined), H]> {
   const kore                        = initKore<T, S, H>( koreClass, initial_value );
   const [_state, set_state]         = React.useState<T>( kore.state as T );    
 
