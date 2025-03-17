@@ -29,11 +29,11 @@ import { initKore, mountLogic } from "./storage";
 import { CompareFunction, partialMountLogic, SelectorFunction } from "./partial";
 
 
-export function mountLogicAssign<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, koreClass : new ( s?:T ) => H,  selector? : SelectorFunction<T, F>, compare? : CompareFunction<T>) {
+export function mountLogicAssign<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, kore : H,  selector? : SelectorFunction<T, F>, compare? : CompareFunction<T>) {
   if (selector || compare)
-    return partialMountLogic( dispatcher, koreClass, selector, compare  );
+    return partialMountLogic( dispatcher, kore, selector, compare  );
   else
-    return mountLogic( (_f : T , n : T) => dispatcher(n), dispatcher, koreClass );
+    return mountLogic( (_f : T , n : T) => dispatcher(n), dispatcher, kore );
     
 }
 
@@ -60,7 +60,7 @@ function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( kore
   const kore                        = initKore<T, S, H>( koreClass, initial_value );
   const [_state, set_state]         = React.useState<T>( kore.state as T );    
 
-  useEffect( () => mountLogicAssign( set_state, koreClass, undefined, compare ), [] );
+  useEffect( () => mountLogicAssign( set_state, kore, undefined, compare ), [kore] );
 
   return [ kore.state, kore ] ;
 }
@@ -92,7 +92,7 @@ function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J exten
   const kore                        = initKore<T, S, H>( koreClass, initial_value );
   const [_state, set_state]         = React.useState<T>( kore.state as T );    
 
-  useEffect( () => mountLogicAssign( set_state, koreClass, selector, compare ), [] );
+  useEffect( () => mountLogicAssign( set_state, kore, selector, compare ), [kore] );
 
   return [ selector(kore.state as T), kore ] ;
 
@@ -124,7 +124,6 @@ function useSoKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T
 }
 
 useSoKore.should = useSoKoreCompare;
-
 
 
 function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, selector : SelectorFunction<T, F>, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[F, H]>

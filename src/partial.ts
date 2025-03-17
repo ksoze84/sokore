@@ -49,6 +49,6 @@ export function checkDepsSetter<T, F>( dispatcher: React.Dispatch<React.SetState
     }    
 }
 
-export function partialMountLogic<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, handlerClass : new ( s?:T ) => H, selector?: SelectorFunction<T, F>, compare?: CompareFunction<T>) {
-  return mountLogic( checkDepsSetter( dispatcher, selector, compare ) as (p : T, n: T) => void, dispatcher, handlerClass );
+export function partialMountLogic<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, kore : H, selector?: SelectorFunction<T, F>, compare?: CompareFunction<T>) {
+  return mountLogic( checkDepsSetter( dispatcher, selector, compare ) as (p : T, n: T) => void, dispatcher, kore );
 }

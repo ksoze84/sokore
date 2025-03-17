@@ -4,8 +4,8 @@ export declare const storage: Map<string, {
     listeners?: Map<Function, (p: any, n: any) => void>;
 }>;
 export declare function initKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H, initial_value?: T | (() => T)): H;
-export declare function mountLogic<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(dispatcher: (p: T, n: T) => void, dispatcherRef: Function, koreClass: new (s?: T) => H): () => void;
-export declare function unmountLogic<T, S>(_dispatcherRef: Function, kore: Kore<T, S>): void;
+export declare function mountLogic<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(dispatcher: (p: T, n: T) => void, dispatcherRef: Function, kore: H): () => void;
+export declare function unmountLogic<T, S>(dispatcherRef: Function, kore: Kore<T, S>): void;
 /**
  * Gets the instance of the Kore class.
  * This is not a hook. It will not trigger re-renders when used in components.

@@ -34,10 +34,7 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
     
     storage.set( koreClass.name, {kore} );
 
-    (kore as any)[_koreDispatcher] = (p: T, n : T) => {
-      console.log(p, n);
-      console.log(storage.get( koreClass.name )?.listeners);
-      storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );}
+    (kore as any)[_koreDispatcher] = (p: T, n : T) => storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );
     (kore as any).destroyInstance = (force? : boolean) => destroyInstance( kore, force );
     
     return kore;
@@ -60,12 +57,12 @@ function destroyInstance<T, S>( kore : Kore<T, S>|Koreko<T, S>, force? : boolean
 }
 
 
-export function mountLogic<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: (p : T, n: T ) => void, dispatcherRef : Function, koreClass : new ( s?:T ) => H ) {
-  const kore = initKore<T, S, H>( koreClass );
+export function mountLogic<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: (p : T, n: T ) => void, dispatcherRef : Function, kore :  H ) {
+  if ( !storage.has( kore.constructor.name ) ) 
+    storage.set( kore.constructor.name, {kore} );
 
   if( !storage.get( kore.constructor.name )?.listeners ){
-    storage.get( kore.constructor.name )!.listeners = new Map<Function, ( p : any, n : any )=>void>();
-    storage.get( kore.constructor.name )!.listeners!.set( dispatcherRef, dispatcher );
+    storage.get( kore.constructor.name )!.listeners = new Map<Function, ( p : any, n : any )=>void>([[dispatcherRef, dispatcher]]);
     kore["instanceCreated"]?.();
   }
   else
