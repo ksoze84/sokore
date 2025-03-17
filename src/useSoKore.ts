@@ -26,15 +26,14 @@ SOFTWARE.
 import React, { useEffect } from "react";
 import { Kore, Koreko } from "./Kore";
 import { initKore, mountLogic } from "./storage";
-import { CompareFunction, partialMountLogic, SelectorFunction } from "./partial";
+import { checkDepsSetter, CompareFunction, SelectorFunction } from "./partial";
 
 
-export function mountLogicAssign<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, kore : H,  selector? : SelectorFunction<T, F>, compare? : CompareFunction<T>) {
-  if (selector || compare)
-    return partialMountLogic( dispatcher, kore, selector, compare  );
+export function mountLogicAssign<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, kore : H,  selector? : SelectorFunction<T, F>, compare? : CompareFunction<T> | true) : () => void {
+  if ((selector || compare) && compare !== true)
+    return mountLogic( checkDepsSetter( dispatcher, selector, compare ) as (p : T, n: T) => void, dispatcher, kore );
   else
     return mountLogic( (_f : T , n : T) => dispatcher(n), dispatcher, kore );
-    
 }
 
 function useSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, initial_value : J | (() => J)) : Readonly<[T, H]>
@@ -88,7 +87,7 @@ function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J exten
  * 
  * @returns A readonly tuple containing the current `selector(state)` and the handler instance.
  */
-function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, selector : SelectorFunction<T, F>, initial_value: J | (() => J), compare? : CompareFunction<T> )  :  Readonly<[ (T | F | undefined), H]> {
+function useSoKoreSelector<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, selector : SelectorFunction<T, F>, initial_value: J | (() => J), compare? : CompareFunction<T> | true )  :  Readonly<[ (T | F | undefined), H]> {
   const kore                        = initKore<T, S, H>( koreClass, initial_value );
   const [_state, set_state]         = React.useState<T>( kore.state as T );    
 
@@ -126,8 +125,8 @@ function useSoKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T
 useSoKore.should = useSoKoreCompare;
 
 
-function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, selector : SelectorFunction<T, F>, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[F, H]>
-function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, selector : SelectorFunction<T, F>, compare : CompareFunction<T> ,initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? F : F | undefined, H]>
+function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, selector : SelectorFunction<T, F>, compare : CompareFunction<T> | true, initial_value : J | (() => J)) : Readonly<[F, H]>
+function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, selector : SelectorFunction<T, F>, compare? : CompareFunction<T> | true, initial_value? : J | (() => J)) : Readonly<[ H extends Koreko<T, S> ? F : F | undefined, H]>
 
 /**
  * 
@@ -147,8 +146,8 @@ function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J 
  * 
  * @returns A readonly tuple containing the current `selector(state)` and the handler instance.
  */
-function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, selector : SelectorFunction<T, F>, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[F|undefined, H]>{
-  return (useSoKoreSelector as any)( koreDefinition, selector, initial_value, compare );
+function useSokoreSelectCompare<T, S, F, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, selector : SelectorFunction<T, F>, compare : CompareFunction<T> | true = true, initial_value? : J | (() => J)) : Readonly<[F|undefined, H]>{
+  return (useSoKoreSelector as any)( koreDefinition, selector, initial_value, compare ?? true );
 }
 
 useSoKore.selectShould = useSokoreSelectCompare;

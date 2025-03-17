@@ -4,12 +4,9 @@ Simple class based hook and state manager for React.
 
 KeyPoints: 
 * Keep the React paradigm. If you are familiar with class components, you will be familiar with this as well.
-* Work with "Kore" extended classes. 
-  * A "kore" has a state and a setState method; write into it all state actions you need.
-* You define the class, the hook manages the rest.
+* Work with "Kore" extended classes; a kore class has a state and a setState method; write into it all state actions you need.
 * Heavy functions are not instantiated in every render. Minimize overhead by avoiding useCallback, useReducer, useMemo, and dependency arrays.
-* Helps to separate logic from render.
-* A basic standalone hook that doesn't store nor share the instance: useKore.
+* There is a basic standalone hook that doesn't store nor share the instance: useKore.
 * And a hook to store and share your kore instance and its state: useSoKore. 
   * The hook maintains a unique instance and its state across your application. 
   * Share the state and actions to update it between components.
@@ -61,6 +58,7 @@ function Counter() {
 - [The kore object](#the-kore-object)
   - [State initialization](#state-initialization)
   - [instanceCreated() function](#instancecreated-function)
+  - [Destroying the instance](#destroying-the-instance)
   - [kore object configuration](#kore-object-configuration)
     - [Merging the state](#merging-the-state)
     - [destroyOnUnmount option](#destroyonunmount-option)
@@ -70,7 +68,6 @@ function Counter() {
   - [Your own setState function](#your-own-setstate-function)
     - [Example with immer:](#example-with-immer)
     - [Or may be you just want to change the setState() accessibility modifier](#or-may-be-you-just-want-to-change-the-setstate-accessibility-modifier)
-  - [Destroying the instance](#destroying-the-instance)
   - [Constructor](#constructor)
 
 
@@ -94,7 +91,7 @@ npm install sokore --save
 * Never set the kore object state directly; is read only!
 * You may save another data in the object, but beware of component state updates signaling and mounting logics if this data mutates over time.
 * Do not manipulate state directly in the constructor.
-* The kore class name you define is used as key for storing/sharing the kore instance. Never use the same name for different kore classes even if they are declared in different scopes.
+* The kore class name you define is used as key for storing/sharing the kore instance. Never use the same name for different kore classes, even if they are declared in different scopes.
 
 
 ## The no-store hook: useKore
@@ -103,14 +100,15 @@ function useKore( koreClass, iniVal? ) returns [ state, kore ];
 ```
 
 This is a simple, classic-behavior custom hook that:
-* Creates an instance of your kore class; this instance and its state is not stored/shared.
+* Creates and uses an instance that is not stored/shared.
 * **This hook does not work alongside useSoKore nor getSoKore, because these store the instance.**
 * More performant than these other hooks.
 * But have the same advantages:
   * Work with classes.
   * Option to merge the state instead of replace it.
   * Your own setState ( _setState() wrapper ).
-  * instanceCreated and instanceDeleted optional methods (in this case are equivalent to mount/unmount the component).
+  * You can control when trigger a re-render
+  * instanceCreated and instanceDeleted optional methods; in this case are equivalent to mount/unmount the component.
 
 ### Example
 ```tsx
@@ -163,10 +161,7 @@ function Counter() {
 
 ## Storing and sharing : useSoKore and getSoKore
 
-The useSoKore hook and the getSoKore utility method, create, use, store, and share a unique instance of your kore class across the application, at global scope. 
-Either can update the state between components, but getSoKore is not a hook, so never trigger a re-render in the component.
-
-With the useSoKore hook, if you pass a selector and/or a compare function as argument, you may control when the component re-renders.  
+The useSoKore hook and the getSoKore utility method, create, use, store, and share a unique instance of your kore class across the application, at global scope. Either can update the state between components, but getSoKore is not a hook, so never trigger a re-render in the component.
 
 To bind the components using the useSoKore hook and/or the getSoKore method together, just use the same kore class.
 
@@ -259,11 +254,9 @@ export function App() {
 function useSoKore.select( koreClass, s => f(s), iniVal? ) returns [ f(s), kore ];
 ```
 
-When a non-undefined object with many properties is used as state, the useSoKore hook will trigger re-render on the component for any part of the state changed, even if the component is using only one of the properties. 
+This function property adds a "selector" function parameter to the useSoKore hook. This will perform a shallow comparison for the selector results with the prev and next states and will trigger a re-render only if these results are different. 
 
-This can be optimized using the **select** function property that adds a "selector" function parameter to the useSoKore hook. This will perform a shallow comparison for the selector results with the prev and next states and will trigger a re-render only if these results are different. 
-
-The selector must be a function that takes the state and transfoms it in an array, an object, or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
+The selector must be a function that takes the state and transforms it in an array, an object, or a value. The result type must remain stable, except for undefined. The hook will return the selector result as first element.
 
 **Use only if you have performance problems; this hook avoids some unnecessary re-renders but introduces a dependency array of comparisons. Always prefer useSoKore( koreClass ) no selector and the getSoKore method first.**
 
@@ -283,8 +276,10 @@ The component will trigger re-renders only if this function returns **true**
 
 You can use the function property **selector** and **should** together, that adds a selector and a compare function parameter to the useSoKore hook.
 
+if you don't pass a compare function, it defaults to true, meaning always trigger re-render for any part of the state changed, with the selector is applied. This can result in better performance than using select or should function alone.
+
 ```js
-function useSoKore.selectShould( koreClass, s => f(s), ( p, n ) => boolean , iniVal? ) returns [ f(s), kore ];
+function useSoKore.selectShould( koreClass, s => f(s), ( p, n ) => boolean, iniVal? ) returns [ f(s), kore ];
 ```
 
 In this case the component will trigger re-renders only if the compare function returns **true**, **regardless of the selector function.**
@@ -390,11 +385,37 @@ class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
 }
 ```
 
+### Destroying the instance
+
+```tsx
+kore.destroyInstance(force?: boolean) => void
+```
+
+You may destroy the stored instance when needed using the **destroyInstance(force?)** method. This method should be called **on the unmount callback** of the component using it, or before loading a new component.  
+This method first checks if there are active state hook listeners active. If there isn't, the instance reference is deleted, and the **instanceDeleted()** method is called if exists. If **force** parameter is true, deletes the instance without checking anything (force destroy with caution).
+
+If you implement **instanceDeleted()**, remember that it is not the equivalent of an unmount component callback.
+
+
+```tsx
+export function App() {
+
+  const [ {data}, {load, destroyInstance} ] = useSoKore( CounterKore );
+
+  useEffect( () => {
+    load();
+    return () => destroyInstance(); // instanceDeleted() would be called
+  }, [] );
+
+ ...
+}
+```
+
 ### kore object configuration
 
 You may configure your kore object by setting the optional property _koreConfig in your kore class. It has two boolean options:
 * merge : The state is overwritten by default with setState. Change this to true to merge.
-* destroyOnUnmount : Tries to delete the instance in each unmount of each component. Is successfully deleted if there are no active listeners (other components using it).
+* destroyOnUnmount : Tries to delete the instance in each unmount of each component. Is successfully deleted if there are no active listeners.
 
 ```tsx
 //default:
@@ -403,7 +424,7 @@ You may configure your kore object by setting the optional property _koreConfig 
 
 #### Merging the state
 
-Replacing the state is the default mode for a kore object setState, but you can configure your kore setState to merge it. This can be usefull for refactor old class components.
+Replacing the state is the default mode for a kore object setState, but you can configure your kore setState to merge it. This can be useful to refactor old class components.
 
 ```tsx
 class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
@@ -444,21 +465,19 @@ function Tables() {
   </>
 }
 ```
-**Note that the useSoKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized using select or should subfunctions**  
-**Merging mode is only for objects, and there is no check of any kind for this before doing it, so its on you to guarantee an initial and always state object.**
+**Note that the useSoKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized using select or should "subHooks"**  
+**Merging mode is only for an object-like state, and there is no check of any kind for this before doing it, so its on you to guarantee an initial and always state object.**
 
 
 #### destroyOnUnmount option
 
 Tries to delete the instance in each unmount of each component. Is successfully deleted if there are no active listeners (other components using it).
 
-Use with caution. Enabling this option can cause unexpected behavior with React.StrictMode on a development environment.
-
-Prefer reset the state, or destroyInstance()
+This can be useful if you need to "restart" your components on unmount that are using a stored kore object and it is not clear which related component will unmount last.
 
 ### Reutilizing classes
 
-Classes are made for reutilization, making new object instances from these. But in this case, the instance creation is managed by the hook, and it maintains only one instance per class name. 
+The instance creation is managed by the hook, so you can't create new instances from your class. 
 One way to use your class again with this hook without duplicating code is to extend it:
 
 ```ts
@@ -467,8 +486,7 @@ class BetaCounterKore extends CounterKore {};
 
 ### Extendibility and Inheritance
 
-You can write common functionality in a generic class and extend this class, adding the specifics. In this case, extending a generic class with Kore lets you encapsulate common functionality:
-
+Extending a generic class with Kore lets you encapsulate common functionality:
 
 MyGenericApiKore.ts : A generic kore for my API
 ```ts
@@ -537,19 +555,18 @@ export function MyComponent() {
 If you work with some framework data loader, like Remix loaders, you can use the getSoKore method to preload data, then useSoKore as usual in your component. **But it is important to not set an initial state; otherwise, this initial state will override loader data**.
 
 ```tsx
-export async function clientLoader() {
-  await getSoKore( ActividadesControl ).load();
+export async function loader() {
+  await getSoKore( koreClass ).load();
   return;
 }
 
 export default function App() {
   // state already have data here:
-  const [ {data : actividades}, {load} ] = useSoKore( ActividadesControl ); 
+  const [ {data} ] = useSoKore( koreClass ); 
 
   return (...)
 }
 ```
-
 
 ### Your own setState function
 
@@ -596,32 +613,6 @@ function Tables() {
 #### Or may be you just want to change the setState() accessibility modifier
 ```tsx
 public setState = this._setState
-```
-
-### Destroying the instance
-
-```tsx
-kore.destroyInstance(force?: boolean) => void
-```
-
-You may destroy the stored instance when needed using the **destroyInstance(force?)** method. This method should be called **on the unmount callback** of the component using it, or before loading a new component.  
-This method first checks if there are active state hook listeners active. If there isn't, the instance reference is deleted, and the **instanceDeleted()** method is called if exists. If **force** parameter is true, deletes the instance without checking anything (force destroy with caution).
-
-If you implement **instanceDeleted()**, remember that it is not the equivalent of an unmount component callback.
-
-
-```tsx
-export function App() {
-
-  const [ {data}, {load, destroyInstance} ] = useSoKore( CounterKore );
-
-  useEffect( () => {
-    load();
-    return () => destroyInstance(); // instanceDeleted() would be called
-  }, [] );
-
- ...
-}
 ```
 
 ### Constructor

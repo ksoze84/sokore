@@ -24,11 +24,9 @@ SOFTWARE.
 
 
 import React from "react";
-import { Kore, Koreko } from "./Kore";
-import { mountLogic } from "./storage";
 
 export type SelectorFunction <T, F> = ( s : T ) => F;
-export type CompareFunction <T> = ( prevSTate : T, nextState : T ) => boolean;
+export type CompareFunction <T> = ( prevSTate : T, nextState : T ) => boolean ;
 
 export function checkDepsSetter<T, F>( dispatcher: React.Dispatch<React.SetStateAction<T>>, selector?: SelectorFunction<T, F>, compare? : CompareFunction<T>) : void | ((p : T, n: T) => void) {
   if(compare)
@@ -47,8 +45,4 @@ export function checkDepsSetter<T, F>( dispatcher: React.Dispatch<React.SetState
       else if( newSelector !== oldSelector )
         dispatcher(newState);
     }    
-}
-
-export function partialMountLogic<T, S, F, H extends (Kore<T, S>|Koreko<T, S>)>( dispatcher: React.Dispatch<React.SetStateAction<T>>, kore : H, selector?: SelectorFunction<T, F>, compare?: CompareFunction<T>) {
-  return mountLogic( checkDepsSetter( dispatcher, selector, compare ) as (p : T, n: T) => void, dispatcher, kore );
 }

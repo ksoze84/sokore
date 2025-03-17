@@ -26,8 +26,6 @@ import { _koreDispatcher, Kore, Koreko } from "./Kore";
 
 export const storage = new Map<string, {kore : Kore<any, any>, listeners? : Map<Function, ( p : any, n : any )=>void>}>();
 
-const _properInitdKoreko = Symbol( "properInitdKoreko" );
-
 export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H , initial_value? : T | (() => T) ) : H {
   if ( !storage.has( koreClass.name ) ) {
     const kore = new koreClass( initial_value instanceof Function ? initial_value() : initial_value );
@@ -41,10 +39,8 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
   }
   else{
     const kore = storage.get( koreClass.name )?.kore as H;
-    if((kore as any)[_properInitdKoreko] === false && initial_value !== undefined){ 
+    if( storage.get( koreClass.name )?.listeners === undefined && initial_value !== undefined)
       kore.state = initial_value instanceof Function ? initial_value() : initial_value;
-      delete (kore as any)[_properInitdKoreko];
-    }
     return kore
   }
 }
@@ -91,11 +87,5 @@ export function unmountLogic<T, S>( dispatcherRef : Function, kore: Kore<T, S>) 
  * @returns The instance of the Kore class.
  */
 export function getSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H ) : H {
-  if ( storage.has( koreClass.name ) )
-    return storage.get( koreClass.name )!.kore as H;
-  else{
-    const kore = initKore<T, S, H>( koreClass );
-    (kore as any)[_properInitdKoreko] = false;
-    return kore;
-  }
+    return (storage.get( koreClass.name )?.kore ?? initKore<T, S, H>( koreClass )) as H;
 }

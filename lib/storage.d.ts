@@ -7,7 +7,7 @@ export declare function initKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(ko
 export declare function mountLogic<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(dispatcher: (p: T, n: T) => void, dispatcherRef: Function, kore: H): () => void;
 export declare function unmountLogic<T, S>(dispatcherRef: Function, kore: Kore<T, S>): void;
 /**
- * Gets the instance of the Kore class.
+ * Gets the instance of the Kore class.  
  * This is not a hook. It will not trigger re-renders when used in components.
  *
  * @template T - The type of the state.
