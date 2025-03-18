@@ -136,12 +136,12 @@ function Counter() {
 
 ### useKore should update
 
-You can use the function property **should**, that add a compare function parameter to the useKore hook.
-
 ```js
 function useKore.should( koreClass, ( prev, next ) => boolean , iniVal? ) 
   returns [ state, kore ];
 ```
+
+You can use the function property **should**, that add a compare function parameter to the useKore hook.
 
 The component will trigger re-renders only if this function returns **true**. Parameters are previous state and next state.
 ```tsx
@@ -287,9 +287,9 @@ function useSoKore.selectShould(kClass, s => f(s), (p, n) => bool, iniVal?)
 
 You can use the function property **selector** and **should** together, that adds a selector and a compare function parameter to the useSoKore hook.
 
-if you don't pass a compare function, it defaults to true, meaning always trigger re-render for any part of the state changed, with the selector is applied. This can result in better performance than using select or should function alone.
-
 In this case the component will trigger re-renders only if the compare function returns **true**, **regardless of the selector function.**
+
+If you don't pass a compare function, it defaults to true, meaning always trigger re-render for any part of the state changed, with the selector is applied. This can result in better performance than using select or should function alone.
 
 
 ### Example of useSoKore hook with select and should.
@@ -543,11 +543,14 @@ MyComponent.tsx
 ```tsx
 import { MyGenericApiKore } from "./MyApiHandler";
 
-class SpecificApiKore extends MyGenericApiKore { loadUri = 'https://myapi/specific' }
+class SpecificApiKore extends MyGenericApiKore { 
+  loadUri = 'https://myapi/specific' 
+}
 
 export function MyComponent() {
 
-  const [{data, isLoading}, {load, formModify, save} ] = useSoKore( SpecificApiKore );
+  const [{data, isLoading}, {load, formModify, save} ] 
+    = useSoKore( SpecificApiKore );
 
   useEffect( () => { load() }, [] );
 
