@@ -2,20 +2,6 @@
 
 Simple class based hook and state manager for React.
 
-KeyPoints: 
-* Keep the React paradigm. If you are familiar with class components, you will be familiar with this as well.
-* Work with "Kore" extended classes; a kore class has a state and a setState method; write into it all state actions you need.
-* Heavy functions are not instantiated in every render. Minimize overhead by avoiding useCallback, useReducer, useMemo, and dependency arrays.
-* There is a basic standalone hook that doesn't store nor share the instance: useKore.
-* And a hook to store and share your kore instance and its state: useSoKore. 
-  * The hook maintains a unique instance and its state across your application. 
-  * Share the state and actions to update it between components.
-  * Some options to avoid unnecessary re-renders on related components.
-* Minimal and simple code. Small footprint and low impact in React's cycles. ( < 5kB minified ).
-
-This readme [looks better in gitHub](https://github.com/ksoze84/sokore?tab=readme-ov-file#sokore)
-
-## Example
 
 ```tsx
 class CounterKore extends Kore {
@@ -36,17 +22,30 @@ function Counter() {
 }
 ```
 
+KeyPoints: 
+* Keep the React paradigm. If you are familiar with class components, you will be familiar with this as well.
+* Work with "Kore" extended classes; a kore class has a state and a setState method; write into it all state actions you need.
+* Heavy functions are not instantiated in every render. Minimize overhead by avoiding useCallback, useReducer, useMemo, and dependency arrays.
+* There is a basic standalone hook that doesn't store nor share the instance: useKore.
+* And a hook to store and share your kore instance and its state: useSoKore. 
+  * The hook maintains a unique instance and its state across your application. 
+  * Share the state and actions to update it between components.
+  * Some options to avoid unnecessary re-renders on related components.
+* Minimal and simple code. Small footprint and low impact in React's cycles. ( ~ 3kB mini / ~ 1kb gzip ).
+
+This readme [looks better in gitHub](https://github.com/ksoze84/sokore?tab=readme-ov-file#sokore)
+
+
 ## Table of contents
 
 
-- [Example](#example)
 - [Table of contents](#table-of-contents)
 - [Basics](#basics)
   - [Installation](#installation)
   - [How to use](#how-to-use)
   - [Rules](#rules)
 - [The no-store hook: useKore](#the-no-store-hook-usekore)
-  - [Example](#example-1)
+  - [Example](#example)
   - [useKore should update](#usekore-should-update)
 - [Storing and sharing : useSoKore and getSoKore](#storing-and-sharing--usesokore-and-getsokore)
   - [useSoKore](#usesokore)
@@ -96,7 +95,8 @@ npm install sokore --save
 
 ## The no-store hook: useKore
 ```js
-function useKore( koreClass, iniVal? ) returns [ state, kore ];
+function useKore( koreClass, iniVal? ) 
+  returns [ state, kore ];
 ```
 
 This is a simple, classic-behavior custom hook that:
@@ -139,7 +139,8 @@ function Counter() {
 You can use the function property **should**, that add a compare function parameter to the useKore hook.
 
 ```js
-function useKore.should( koreClass, ( prev, next ) => boolean , iniVal? ) returns [ state, kore ];
+function useKore.should( koreClass, ( prev, next ) => boolean , iniVal? ) 
+  returns [ state, kore ];
 ```
 
 The component will trigger re-renders only if this function returns **true**. Parameters are previous state and next state.
@@ -169,7 +170,8 @@ To bind the components using the useSoKore hook and/or the getSoKore method toge
 ### useSoKore
 
 ```js
-function useSoKore( koreClass, iniVal? ) returns [ state, kore ];
+function useSoKore( koreClass, iniVal? ) 
+  returns [ state, kore ];
 ```
 
 This hook is equal to useKore, but store, or use an already stored, instance of your kore class and its state.
@@ -200,7 +202,8 @@ function Counter() {
 ### Get the instance with getSoKore
 
 ```js
-function getSoKore( koreClass ) returns kore;
+function getSoKore( koreClass ) 
+  returns kore;
 ```
 
 Get the instance of your kore using the getSoKore utility method. This method is not a hook, so it never triggers a new render. 
@@ -251,7 +254,8 @@ export function App() {
 
 ### useSoKore selector
 ```js
-function useSoKore.select( koreClass, s => f(s), iniVal? ) returns [ f(s), kore ];
+function useSoKore.select( koreClass, s => f(s), iniVal? ) 
+  returns [ f(s), kore ];
 ```
 
 This function property adds a "selector" function parameter to the useSoKore hook. This will perform a shallow comparison for the selector results with the prev and next states and will trigger a re-render only if these results are different. 
@@ -266,7 +270,8 @@ The selector must be a function that takes the state and transforms it in an arr
 You can use the function property **should**, that add a compare function parameter to the useSoKore hook. Parameters are previous state and next state.
 
 ```js
-function useSoKore.should( koreClass, ( prev, next ) => boolean , iniVal? ) returns [ state, kore ]
+function useSoKore.should( koreClass, ( prev, next ) => boolean , iniVal? ) 
+  returns [ state, kore ]
 ```
 
 The component will trigger re-renders only if this function returns **true**
@@ -276,11 +281,14 @@ The component will trigger re-renders only if this function returns **true**
 
 You can use the function property **selector** and **should** together, that adds a selector and a compare function parameter to the useSoKore hook.
 
+```js
+function useSoKore.selectShould(kClass, s => f(s), (p, n) => bool, iniVal?) 
+  returns [ f(s), kore ];
+```
+
 if you don't pass a compare function, it defaults to true, meaning always trigger re-render for any part of the state changed, with the selector is applied. This can result in better performance than using select or should function alone.
 
-```js
-function useSoKore.selectShould( koreClass, s => f(s), ( p, n ) => boolean, iniVal? ) returns [ f(s), kore ];
-```
+
 
 In this case the component will trigger re-renders only if the compare function returns **true**, **regardless of the selector function.**
 
