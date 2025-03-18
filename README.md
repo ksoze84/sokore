@@ -147,7 +147,8 @@ The component will trigger re-renders only if this function returns **true**. Pa
 ```tsx
 // re-renders only if counter is pair
 function Counter() {
-  const [count, {add, subtract}] = useKore.should(CounterKore, (_, n) => n % 2 == 0 );
+  const [count, {add, subtract}] 
+    = useKore.should(CounterKore, (_, n) => n % 2 == 0 );
 
   return (
     <div>
@@ -316,7 +317,8 @@ class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
 
 function Chairs() {
   // This component re-renders only if the compare function(prevState, nextState) returns true
-  const [{chairs},{addChairs,subtractChairs}] = useSoKore.should( CounterKore, (p, n) => p.chairs !== n.chairs ); 
+  const [{chairs},{addChairs,subtractChairs}] 
+    = useSoKore.should( CounterKore, (p, n) => p.chairs !== n.chairs ); 
 
   return <>
     <span>Chairs: {chairs}</span>
@@ -328,7 +330,8 @@ function Chairs() {
 function Tables() {
   // This component re-renders only if tables.toString() changes
   // Here tables is a string
-  const [tables, {addTables, subtractTables}] = useSoKore.select( CounterKore, s => s.tables.toString() ); 
+  const [tables, {addTables, subtractTables}] 
+    = useSoKore.select( CounterKore, s => s.tables.toString() ); 
 
   return <>
     <span>Tables: {tables}</span>
