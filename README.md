@@ -87,8 +87,8 @@ npm install sokore --save
 
 ### Rules
 
-* Never set the kore object state directly; is read only!
-* You may save another data in the object, but beware of component state updates signaling and mounting logics if this data mutates over time.
+* Never set the kore object state directly.
+* You may save another data in the object besides the state, but be aware that the components will not react to changes to this data automatically.
 * Do not manipulate state directly in the constructor.
 * The kore class name you define is used as key for storing/sharing the kore instance. Never use the same name for different kore classes, even if they are declared in different scopes.
 
@@ -268,28 +268,26 @@ The selector must be a function that takes the state and transforms it in an arr
 
 ### useSoKore should update
 
-You can use the function property **should**, that add a compare function parameter to the useSoKore hook. Parameters are previous state and next state.
-
 ```js
 function useSoKore.should( koreClass, ( prev, next ) => boolean , iniVal? ) 
   returns [ state, kore ]
 ```
+
+You can use the function property **should**, that add a compare function parameter to the useSoKore hook. Parameters are previous state and next state.
 
 The component will trigger re-renders only if this function returns **true**
 
 
 ### useSoKore selector and should update
 
-You can use the function property **selector** and **should** together, that adds a selector and a compare function parameter to the useSoKore hook.
-
 ```js
 function useSoKore.selectShould(kClass, s => f(s), (p, n) => bool, iniVal?) 
   returns [ f(s), kore ];
 ```
 
+You can use the function property **selector** and **should** together, that adds a selector and a compare function parameter to the useSoKore hook.
+
 if you don't pass a compare function, it defaults to true, meaning always trigger re-render for any part of the state changed, with the selector is applied. This can result in better performance than using select or should function alone.
-
-
 
 In this case the component will trigger re-renders only if the compare function returns **true**, **regardless of the selector function.**
 
@@ -348,39 +346,26 @@ This instance is created by the hook with the kore class you wrote that is passe
 
 ### State initialization
 
+```tsx
+class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
+  state = { chairs: 0, tables : 0, rooms : 10  }
+  ...
+
+// OR 
+function Counter() {
+  const [counters] = useSoKore(CounterKore, { chairs: 0, tables : 0, rooms : 10 });
+  ...
+
+```
+
 You can set an initial state in the class definition or pass an initial value on the hook. You should not initialize the state with both methods, but if you do, the initial value on the hook has priority.
 
 Prefer setting the state in the class definition for easier readability.
-
-```tsx
-class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
-  state = {
-    chairs: 0,
-    tables : 0,
-    rooms : 10
-  }
-
-  ...
-}
-
-// OR 
-
-function Counter() {
-  const [counters] = useSoKore(CounterKore, { chairs: 0, tables : 0, rooms : 10 });
-
- ...
-}
-
-```
 
 **Code you wrote in instanceCreated() method will update the initial state.**
 
 
 ### instanceCreated() function
-
-Optional method that is called only once when an instance is created. If exists in the instance, this method is called by the useSoKore or useKore hook the first time a component in the application using the hook is effectively mounted and when the instance is "newly created".  
-
-This method has NOT the same behavior as mount callback of a component in React when using useSoKore. The only way this method is called again by the hook is by destroying the instance first with destroyInstance().
 
 ```tsx
 class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
@@ -391,10 +376,15 @@ class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
   }
 
   instanceCreated = () => {
-    fetch('https://myapi.com/counters').then( r => r.json() ).then( r => this.setState(r) );
+    fetch('https://myapi.com/counters')
+      .then( r => r.json() ).then( r => this.setState(r) );
   }
 }
 ```
+
+Optional method that is called only once when an instance is created. If exists in the instance, this method is called by the useSoKore or useKore hook the first time a component in the application using the hook is effectively mounted and when the instance is "newly created".  
+
+This method has NOT the same behavior as mount callback of a component in React when using useSoKore. The only way this method is called again by the hook is by destroying the instance first with destroyInstance().
 
 ### Destroying the instance
 
@@ -424,18 +414,16 @@ export function App() {
 
 ### kore object configuration
 
-You may configure your kore object by setting the optional property _koreConfig in your kore class. It has two boolean options:
-* merge : The state is overwritten by default with setState. Change this to true to merge.
-* destroyOnUnmount : Tries to delete the instance in each unmount of each component. Is successfully deleted if there are no active listeners.
-
 ```tsx
 //default:
  _koreConfig = { merge : false, destroyOnUnmount : false }
 ```
 
-#### Merging the state
+You may configure your kore object by setting the optional property _koreConfig in your kore class. It has two boolean options:
+* merge : The state is overwritten by default with setState. Change this to true to merge.
+* destroyOnUnmount : Tries to delete the instance in each unmount of each component. Is successfully deleted if there are no active listeners.
 
-Replacing the state is the default mode for a kore object setState, but you can configure your kore setState to merge it. This can be useful to refactor old class components.
+#### Merging the state
 
 ```tsx
 class CounterKore extends Kore<{chairs:number, tables:number, rooms:number}> {
@@ -476,7 +464,11 @@ function Tables() {
   </>
 }
 ```
+
+Replacing the state is the default mode for a kore object setState, but you can configure your kore setState to merge it. This can be useful to refactor old class components.
+
 **Note that the useSoKore hook will trigger re-render for any part of the state changed. In the example above, Tables component will re-render if the chairs value is changed. This behavior can be optimized using select or should "subHooks"**  
+
 **Merging mode is only for an object-like state, and there is no check of any kind for this before doing it, so its on you to guarantee an initial and always state object.**
 
 
@@ -485,6 +477,8 @@ function Tables() {
 Tries to delete the instance in each unmount of each component. Is successfully deleted if there are no active listeners (other components using it).
 
 This can be useful if you need to "restart" your components on unmount that are using a stored kore object and it is not clear which related component will unmount last.
+
+with destroyOnUnmount enabled, SoKore will behave similarly to a context, with fresh instances on remount components. 
 
 ### Reutilizing classes
 
