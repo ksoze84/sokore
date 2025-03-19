@@ -37,11 +37,11 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
 
     (kore as any)[_koreDispatcher] = (p: T, n : T) => {
       storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );
-      callSubscriptors(kore)
+      callSubscriptors(kore);
     };
     (kore as any).destroyInstance = (force? : boolean) => destroyInstance( kore, force );
     
-    callSubscriptors(kore)
+    callSubscriptors(kore);
     
     return kore;
   }
@@ -50,6 +50,7 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
     if((kore as any).__properInitdKoreko_ === false){ 
       kore.state = initial_value instanceof Function ? initial_value() : initial_value;
       delete (kore as any).__properInitdKoreko_;
+      callSubscriptors(kore);
     }
     return kore;
   }
