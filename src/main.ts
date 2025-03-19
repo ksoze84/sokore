@@ -23,7 +23,7 @@ SOFTWARE.
  */
 
 import { Kore } from "./Kore";
-import { getSoKore } from "./storage";
+import { getSoKore } from "./getSoKore";
 import { useSoKore } from "./useSoKore";
 import { useKore } from "./useKore";
 
