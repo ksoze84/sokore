@@ -53,7 +53,7 @@ export declare abstract class Kore<T, S = SetStateType<T>> {
     protected setState: S;
     /**
      * Destroys the instance if there are no active listeners.  
-     * Use this method to delete the instance **on the unmount callback** of the component using it.  
+     * Use this method to delete the instance **on the unmount callback** of the component using it.
      *
      * @param force - If true, the instance is deleted even if there are active listeners.
      */

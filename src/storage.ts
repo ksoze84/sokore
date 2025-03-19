@@ -26,7 +26,7 @@ import { _koreDispatcher, Kore, Koreko } from "./Kore";
 
 export const storage = new Map<string, {kore : Kore<any, any>, listeners? : Map<Function, ( p : any, n : any )=>void>}>();
 export const subscriptions = new Map<string, ((updatedKore : any) => any)[]>();
-
+export const _properInitdKoreko = Symbol( "properInitdKoreko" );
 
 export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H , initial_value? : T | (() => T) ) : H {
   if ( !storage.has( koreClass.name ) ) {
@@ -44,9 +44,11 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
   }
   else{
     const kore = storage.get( koreClass.name )?.kore as H;
-    if( storage.get( koreClass.name )?.listeners === undefined && initial_value !== undefined)
+    if((kore as any).__properInitdKoreko_ === false){ 
       kore.state = initial_value instanceof Function ? initial_value() : initial_value;
-    return kore
+      delete (kore as any).__properInitdKoreko_;
+    }
+    return kore;
   }
 }
 
