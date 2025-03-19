@@ -349,6 +349,11 @@ function getSoKore( koreClass, ( koreUpdatedInstance ) => any )
 
 You can use the getsokore method to suscribe a function to state changes instead of get the instance directly.
 
+this example shows how to suscribe and unsuscribe a function that logs counter changes : 
+```ts
+useEffect( () => getSoKore(SimpleCounterKore, s => console.log("Counter: ", s.state) ) , [] )
+```
+
 ## The kore object
 
 The kore object is an instance of a class you wrote with actions and that extends the abstract Kore class of this package. Extending the Kore class gives to the child a state property and a setState method, among others.
