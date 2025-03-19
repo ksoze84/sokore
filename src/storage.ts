@@ -25,6 +25,8 @@ SOFTWARE.
 import { _koreDispatcher, Kore, Koreko } from "./Kore";
 
 export const storage = new Map<string, {kore : Kore<any, any>, listeners? : Map<Function, ( p : any, n : any )=>void>}>();
+export const subscriptions = new Map<string, ((updatedKore : any) => any)[]>();
+export const _properInitdKoreko = Symbol( "properInitdKoreko" );
 
 export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H , initial_value? : T | (() => T) ) : H {
   if ( !storage.has( koreClass.name ) ) {
@@ -32,16 +34,21 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
     
     storage.set( koreClass.name, {kore} );
 
-    (kore as any)[_koreDispatcher] = (p: T, n : T) => storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );
+    (kore as any)[_koreDispatcher] = (p: T, n : T) => {
+      storage.get( koreClass.name )?.listeners?.forEach( l => l( p, n ) );
+      subscriptions.get( koreClass.name )?.forEach( l => l( kore ) );
+    };
     (kore as any).destroyInstance = (force? : boolean) => destroyInstance( kore, force );
     
     return kore;
   }
   else{
     const kore = storage.get( koreClass.name )?.kore as H;
-    if( storage.get( koreClass.name )?.listeners === undefined && initial_value !== undefined)
+    if((kore as any).__properInitdKoreko_ === false){ 
       kore.state = initial_value instanceof Function ? initial_value() : initial_value;
-    return kore
+      delete (kore as any).__properInitdKoreko_;
+    }
+    return kore;
   }
 }
 
@@ -76,16 +83,4 @@ export function unmountLogic<T, S>( dispatcherRef : Function, kore: Kore<T, S>) 
 }
 
 
-/**
- * Gets the instance of the Kore class.  
- * This is not a hook. It will not trigger re-renders when used in components.
- * 
- * @template T - The type of the state.
- * @template S - The type of the setState function.
- * @template H - The type of the Kore class.
- * @param koreClass - The constructor of the Kore class.
- * @returns The instance of the Kore class.
- */
-export function getSoKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H ) : H {
-    return (storage.get( koreClass.name )?.kore ?? initKore<T, S, H>( koreClass )) as H;
-}
+
