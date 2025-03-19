@@ -54,6 +54,7 @@ This readme [looks better in gitHub](https://github.com/ksoze84/sokore?tab=readm
   - [useSoKore should update](#usesokore-should-update)
   - [useSoKore selector and should update](#usesokore-selector-and-should-update)
   - [Example of useSoKore hook with select and should.](#example-of-usesokore-hook-with-select-and-should)
+  - [Subscribe to state changes](#subscribe-to-state-changes)
 - [The kore object](#the-kore-object)
   - [State initialization](#state-initialization)
   - [instanceCreated() function](#instancecreated-function)
@@ -338,6 +339,16 @@ function Tables() {
   </>
 }
 ```
+
+
+### Subscribe to state changes
+```js
+function getSoKore( koreClass, ( koreUpdatedInstance ) => any ) 
+  returns unsubscribe();
+```
+
+You can use the getsokore method to suscribe a function to state changes instead of get the instance directly.
+
 ## The kore object
 
 The kore object is an instance of a class you wrote with actions and that extends the abstract Kore class of this package. Extending the Kore class gives to the child a state property and a setState method, among others.

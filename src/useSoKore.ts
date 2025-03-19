@@ -25,7 +25,8 @@ SOFTWARE.
 
 import React, { useEffect } from "react";
 import { Kore, Koreko } from "./Kore";
-import { initKore, mountLogic } from "./storage";
+import { initKore } from "./storage";
+import { mountLogic } from "./mountLogic";
 import { checkDepsSetter, CompareFunction, SelectorFunction } from "./partial";
 
 

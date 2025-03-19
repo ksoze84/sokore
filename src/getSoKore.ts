@@ -1,16 +1,34 @@
-import { Kore, Koreko } from "./Kore";
-import { storage, initKore, subscriptions, _properInitdKoreko } from "./storage";
+/* 
+MIT License
 
-function removeArrayObject( object : any , array? : any[]) {
-  let index = array?.indexOf( object ) ?? -1;
-  if ( index !== -1 )
-    array!.splice( index, 1 );
-}
+Copyright (c) 2021 Felipe Rodriguez Herrera
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
+import { Kore, Koreko } from "./Kore";
+import { storage, initKore, _properInitdKoreko } from "./storage";
+import { pushSubscription, unsubscribe } from "./subscriptions";
 
 function getSoKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H, subscribeCallback : (updatedKore : H) => any) : () => void
 function getSoKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H) : H
 /**
- * Gets the instance of the Kore class
+ * Gets the instance of the Kore class  
  * or subscribe a function to state changes.
  *
  * @template T - The type of the state.
@@ -29,8 +47,8 @@ function getSoKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (
       return kore;
     }
   else{
-    subscriptions.set( koreClass.name, [...(subscriptions.get( koreClass.name ) ?? []), subscribeCallback] );
-    return  () => removeArrayObject(subscribeCallback, subscriptions.get( koreClass.name ));
+    pushSubscription(koreClass.name, subscribeCallback)
+    return  () => unsubscribe(subscribeCallback,  koreClass.name);
   } 
 }
 
