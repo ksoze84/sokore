@@ -24,18 +24,19 @@ SOFTWARE.
 
 
 import React, { useEffect } from "react";
-import { _koreDispatcher, Kore, Koreko } from "./Kore";
+import { _koreDispatcher, Kore, Koreko, setInitialValue } from "./Kore";
 import { CompareFunction } from "./partial";
 
-function initSimpleKore<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(koreClass: new (s?: T) => H, initial_value: T | (() => T), getSetState: () => React.Dispatch<React.SetStateAction<T>>, compare?: CompareFunction<T>) {
-  const kore = new koreClass(initial_value instanceof Function ? initial_value() : initial_value);
-
-  console.log(compare);
-
-  (kore as any)[_koreDispatcher] = compare ? (prevState : T, newState : T) => ( compare(prevState, newState) && getSetState()(newState) ) : ((_ :T, s : T) => getSetState()(s) ) ;
-  (kore as any).destroyInstance = () => kore["instanceDeleted"]?.();
-
+function initSimpleKore<T, S, H extends (Kore<T, S> | Koreko<T, S>), J extends T>(koreClass : new ( s?:T ) => H, setState: React.Dispatch<React.SetStateAction<T>>, initial_value? : J | (() => J), compare?: CompareFunction<T>){
+  const kore = new koreClass();
+  setInitialValue(kore, initial_value);
+  (kore as any)[_koreDispatcher] = compare ? (prevState : T, newState : T) => ( compare(prevState, newState) && setState(newState) ) : ((_ :T, s : T) => setState(s) ) ;
   return kore;
+}
+
+function basicMountLogic<T, S, H extends (Kore<T, S> | Koreko<T, S>)>(kore: H) {
+  kore["instanceCreated"]?.();
+  return () => kore["instanceDeleted"]?.();
 }
 
 function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, initial_value : J | (() => J)) : Readonly<[T, H]>
@@ -55,20 +56,13 @@ function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreCl
  * 
  * @returns A readonly tuple containing the current state and the kore instance.
  */
-function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreClass : new ( s?:T ) => H, initial_value: J | (() => J), compare? : CompareFunction<T>) : Readonly<[T | undefined, H]>  {
-  const [kore, ]                      = React.useState<Kore<T, S>>( () : H => initSimpleKore<T, S, H>(koreClass, initial_value, () => set_state, compare ) );
-  const [_state, set_state]           = React.useState<T>( kore.state as T );    
+function useKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H, initial_value: T | (() => T), compare? : CompareFunction<T>) : Readonly<[T | undefined, H]>  {
+  const [kore, ]                      = React.useState<H>( () => initSimpleKore(koreClass, (v) => set_state(v), initial_value, compare) );
+  const [_state, set_state]             = React.useState<T>( kore.state as T );    
   
-  useEffect(() => {
-    kore["instanceCreated"]?.();
-    return () => kore.destroyInstance();
-  }, [])
+  useEffect(() => basicMountLogic(kore as any), []);
 
-  return [ kore.state, kore as H ];
-
-
-  
-
+  return [ kore.state, kore ];
 }
 
 function useKoreCompare<T, S, H extends (Kore<T, S>|Koreko<T, S>), J extends T>( koreDefinition : new ( s?:T ) => H, compare : CompareFunction<T> ,initial_value : J | (() => J)) : Readonly<[T, H]>

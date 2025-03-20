@@ -1,4 +1,5 @@
 export type SetStateType<T> = (value: T | Partial<T> | ((prevState: T) => T | Partial<T>)) => void;
+export declare function setInitialValue<T, S>(kore: Kore<T, S>, initial_value?: T | (() => T)): void;
 export declare const _koreDispatcher: unique symbol;
 /**
  * Abstract class representing a "Kore" that have a state and a setState method.  

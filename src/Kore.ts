@@ -25,6 +25,10 @@ SOFTWARE.
 
 export type SetStateType<T> = (value: T | Partial<T> | ((prevState: T) => T | Partial<T>)) => void;
 
+export function setInitialValue <T,S>(kore : Kore<T,S>, initial_value? : T | (() => T)) {
+  kore.state = initial_value instanceof Function ? initial_value() : (initial_value ?? kore.state);
+}
+
 export const _koreDispatcher = Symbol("koreDispatcher");
 
 
@@ -112,7 +116,7 @@ export abstract class Kore<T, S = SetStateType<T>> {
    * @param state - The initial state.
    */
   constructor(state?: T) {
-    if (state !== undefined) this.state = state;
+    this.state = state;
   }
 
 }

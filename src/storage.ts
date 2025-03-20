@@ -23,7 +23,7 @@ SOFTWARE.
  */
 
 
-import { _koreDispatcher, Kore, Koreko } from "./Kore";
+import { _koreDispatcher, Kore, Koreko, setInitialValue } from "./Kore";
 import { callSubscriptors } from "./subscriptions";
 
 export const storage = new Map<string, {kore : Kore<any, any>, listeners? : Map<Function, ( p : any, n : any )=>void>}>();
@@ -31,7 +31,8 @@ export const _properInitdKoreko = Symbol( "properInitdKoreko" );
 
 export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H , initial_value? : T | (() => T) ) : H {
   if ( !storage.has( koreClass.name ) ) {
-    const kore = new koreClass( initial_value instanceof Function ? initial_value() : initial_value );
+    const kore = new koreClass();
+    setInitialValue( kore, initial_value );
     
     storage.set( koreClass.name, {kore} );
 
@@ -48,7 +49,7 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
   else{
     const kore = storage.get( koreClass.name )?.kore as H;
     if((kore as any).__properInitdKoreko_ === false){ 
-      kore.state = initial_value instanceof Function ? initial_value() : initial_value;
+      setInitialValue( kore, initial_value );
       delete (kore as any).__properInitdKoreko_;
       callSubscriptors(kore);
     }
