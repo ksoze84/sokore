@@ -349,7 +349,7 @@ function getSoKore( koreClass, ( koreUpdatedInstance ) => any )
 
 You can use the getsokore method to suscribe a function to state changes instead of get the instance directly.
 
-this example shows how to suscribe and unsuscribe a function that logs counter changes : 
+This example shows how to suscribe and unsubscribe a function that logs counter changes : 
 ```ts
 useEffect( () => getSoKore(SimpleCounterKore, s => console.log("Counter: ", s.state) ) , [] )
 ```
