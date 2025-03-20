@@ -76,7 +76,7 @@ This readme [looks better in gitHub](https://github.com/ksoze84/sokore?tab=readm
 ### Installation
 
 ```
-npm install sokore --save
+npm add sokore
 ```
 
 ### How to use
@@ -91,7 +91,7 @@ npm install sokore --save
 * Never set the kore object state directly.
 * You may save another data in the object besides the state, but be aware that the components will not react to changes to this data automatically.
 * Do not manipulate state directly in the constructor.
-* The kore class name you define is used as key for storing/sharing the kore instance. Never use the same name for different kore classes, even if they are declared in different scopes.
+* The kore class name is used as key for storing/sharing the kore instance. Never use the same name for different kore classes, even if they are declared in different scopes.
 
 
 ## The no-store hook: useKore
