@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
+import React from "react";
+
 
 export type SetStateType<T> = (value: T | Partial<T> | ((prevState: T) => T | Partial<T>)) => void;
 
@@ -30,6 +32,25 @@ export function setInitialValue <T,S>(kore : Kore<T,S>, initial_value? : T | (()
 }
 
 export const _koreDispatcher = Symbol("koreDispatcher");
+
+export const _koreControl = Symbol("koreControl");
+
+export class KoreControl<T, S> {
+  public koreInstance? : Kore<T, S>;
+  public listeners? : Set<(p : T, n: T) => void>;
+  public subscriptions? : Set<(k:Kore<T, S>) => any>;
+  public dispatch = ( prev : T, next : T ) => {
+    this.listeners?.forEach( l => l(prev, next) );
+    this.subscriptions?.forEach( s => s(this.koreInstance!) );
+  };
+  public destroyInstance = (force? : boolean) => {
+    if (force || !this.listeners?.size){
+      this.koreInstance?.["instanceDeleted"]?.();
+      this.koreInstance = undefined;
+      this.listeners = undefined;
+    }
+  };
+}
 
 
 
