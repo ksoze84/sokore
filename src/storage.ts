@@ -23,13 +23,16 @@ SOFTWARE.
  */
 
 
-import { _koreDispatcher, Kore, Koreko, setInitialValue } from "./Kore";
+import { _koreControl, _koreDispatcher, Kore, KoreClass, KoreControl, Koreko, setInitialValue } from "./Kore";
 import { callSubscriptors } from "./subscriptions";
 
 export const storage = new Map<string, {kore : Kore<any, any>, listeners? : Map<Function, ( p : any, n : any )=>void>}>();
 export const _properInitdKoreko = Symbol( "properInitdKoreko" );
 
-export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : new ( s?:T ) => H , initial_value? : T | (() => T) ) : H {
+export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass : KoreClass<T, S, H> , initial_value? : T | (() => T) ) : H {
+
+  koreClass[_koreControl] ??= new KoreControl<T, S>();
+
   if ( !storage.has( koreClass.name ) ) {
     const kore = new koreClass();
     setInitialValue( kore, initial_value );

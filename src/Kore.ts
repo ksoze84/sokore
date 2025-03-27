@@ -22,8 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import React from "react";
-
 
 export type SetStateType<T> = (value: T | Partial<T> | ((prevState: T) => T | Partial<T>)) => void;
 
@@ -34,6 +32,11 @@ export function setInitialValue <T,S>(kore : Kore<T,S>, initial_value? : T | (()
 export const _koreDispatcher = Symbol("koreDispatcher");
 
 export const _koreControl = Symbol("koreControl");
+
+export interface KoreClass<T, S, H extends Kore<T, S>|Koreko<T, S>> {
+  new (s?: T): H;
+  [_koreControl]?: KoreControl<T, S>;
+}
 
 export class KoreControl<T, S> {
   public koreInstance? : Kore<T, S>;
