@@ -48,9 +48,9 @@ export function initKore<T, S, H extends (Kore<T, S>|Koreko<T, S>)>( koreClass :
   }
   else{
     const kore = storage.get( koreClass.name )?.kore as H;
-    if((kore as any).__properInitdKoreko_ === false){ 
+    if((kore as any)[_properInitdKoreko] === false){ 
       setInitialValue( kore, initial_value );
-      delete (kore as any).__properInitdKoreko_;
+      delete (kore as any)[_properInitdKoreko];
       callSubscriptors(kore);
     }
     return kore;
