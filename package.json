@@ -1,6 +1,6 @@
 {
   "name": "sokore",
-  "version": "3.4.5",
+  "version": "3.4.6",
   "description": "Simple object based hook and state manager for React.",
   "main": "lib/main.js",
   "module": "lib/main.esm.js",
@@ -12,7 +12,8 @@
     "deploy": "npm version minor --force -m",
     "parche": "npm version patch --force -m",
     "version": "git add -A ",
-    "postversion": "git push origin && git push origin --tags"
+    "postversion": "git push origin && git push origin --tags",
+    "templaTo": " mkdir ../${npm_config_dest} && cp -rv `ls -A | grep -vE '^(.git|scripts|node_modules|bin|build|dist|lib|package-lock.json)$'` ../${npm_config_dest}"
   },
   "files": [
     "lib",

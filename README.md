@@ -35,6 +35,7 @@ KeyPoints:
 
 This readme [looks better in gitHub](https://github.com/ksoze84/sokore?tab=readme-ov-file#sokore)
 
+This package is similar to [use-Fun](https://github.com/ksoze84/usefun)
 
 ## Table of contents
 
